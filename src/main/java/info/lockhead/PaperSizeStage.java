@@ -13,6 +13,6 @@ public class PaperSizeStage extends Stage {
     public PaperSizeStage(final Construct scope, final String id, final StageProps props) {
         super(scope, id, props);
 
-        new PaperSizeStack(this, "CheckAgeLambdaStack");
+        new PaperSizeStack(this, "PaperSizeLambdaStack");
     }
 }
