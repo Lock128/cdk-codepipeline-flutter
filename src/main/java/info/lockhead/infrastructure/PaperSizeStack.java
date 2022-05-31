@@ -25,10 +25,11 @@ public class PaperSizeStack extends Stack {
 	public PaperSizeStack(final Construct parent, final String id, final StackProps props) {
 		super(parent, id, props);
 		// Defines a new lambda resource
-		final Function paperSize = Function.Builder.create(this, "PaperSizeStack")
-				.runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_14_X) // execution environment
+		final Function paperSize = Function.Builder.create(this, "PaperSizeHandler")
+				.runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_16_X) // execution environment
 				.code(Code.fromAsset("lambda-typescript-2/lib")) // code loaded from the "lambda" directory
-				.handler("paper-size.handler") // file is "hello", function is "handler"
+				.memorySize(64)
+				.handler("papersize.handler") // file is "hello", function is "handler"
 				.build();
 
 		functionUrl = paperSize.addFunctionUrl(FunctionUrlOptions.builder().authType(FunctionUrlAuthType.NONE)

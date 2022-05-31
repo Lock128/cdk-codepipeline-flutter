@@ -1,4 +1,4 @@
-import * as CheckAge from '../lib/check-age';
+import * as CheckAge from '../lib/checkage';
 
 
 test('CheckAgeInGermany', () => {

@@ -1,4 +1,4 @@
-import * as PaperSize from '../lib/paper-size';
+import * as PaperSize from '../lib/papersize';
 
 
 test('PaperSizeInGermany', () => {
