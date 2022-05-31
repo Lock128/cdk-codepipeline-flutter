@@ -108,7 +108,7 @@ public class CdkPipelineStack extends Stack {
 	}
     
     private String getCodepipelineName(String branch) {
-      String string = "CodecovPipeline"+branch.replace("-", "").replace("/", "");
+      String string = "CDKCodepipelineFlutterStack"+branch.replace("-", "").replace("/", "");
       if (string.length()>50) {
     	  string = string.substring(0, 50);
       }
