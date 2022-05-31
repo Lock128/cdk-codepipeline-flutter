@@ -28,7 +28,7 @@ public class CheckAgeLambdaStack extends Stack {
 		// Defines a new lambda resource
 		
 		NodejsFunction checkAge = NodejsFunction.Builder.create(this, "CheckAgeHandler").entry("lambda-typescript/lib/check-age.ts")
-				.entry("handler").memorySize(64).build();
+				.entry("handler").memorySize(128).build();
 		
 		
 		functionUrl = checkAge.addFunctionUrl(FunctionUrlOptions.builder().authType(FunctionUrlAuthType.NONE)
