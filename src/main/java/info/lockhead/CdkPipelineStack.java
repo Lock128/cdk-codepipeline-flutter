@@ -61,15 +61,19 @@ public class CdkPipelineStack extends Stack {
 
 		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
 				AddStageOpts.builder().pre(List.of(ShellStep.Builder.create("Install Flutter")
-						.commands(List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
-								"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor",
-								"flutter doctor", "flutter devices"))
-						.build()))
-						.post(List.of(ShellStep.Builder.create("Execute Flutter Build and CodeCov")
-								.commands(List.of("cd ui", "flutter test", "flutter build web",
-										"bash ../start_codecov.sh",
-										"aws s3 sync ui/build/web s3://cdk-codepipeline-flutter"))
-								.build()))
+						.commands(
+								List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
+										"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor",
+										"flutter doctor", "flutter devices"))
+						.build())).post(
+								List.of(ShellStep.Builder.create("Execute Flutter Build and CodeCov")
+										.commands(List.of(
+												"git clone https://github.com/flutter/flutter.git -b stable --depth 1",
+												"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache",
+												"flutter doctor", "flutter doctor", "flutter devices", "cd ui",
+												"flutter test", "flutter build web", "bash ../start_codecov.sh",
+												"aws s3 sync ui/build/web s3://cdk-codepipeline-flutter"))
+										.build()))
 						.build());
 
 	}
