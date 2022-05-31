@@ -28,7 +28,7 @@ public class PaperSizeStack extends Stack {
 		super(parent, id, props);
 		// Defines a new lambda resource
 		NodejsFunction paperSize = NodejsFunction.Builder.create(this, "PaperSizeHandler").entry("lambda-typescript-2/lib/paper-size.ts")
-				.handler("handler").memorySize(128).depsLockFilePath("lambda-typescript2/package-lock.json").build();
+				.handler("handler").memorySize(128).depsLockFilePath("lambda-typescript-2/package-lock.json").build();
 
 //		final Function paperSize = Function.Builder.create(this, "PaperSizeHandler")
 //				.runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_16_X) // execution environment
