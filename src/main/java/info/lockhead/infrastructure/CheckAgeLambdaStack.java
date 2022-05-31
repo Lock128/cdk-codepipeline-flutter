@@ -13,6 +13,7 @@ import software.amazon.awscdk.services.lambda.FunctionUrlAuthType;
 import software.amazon.awscdk.services.lambda.FunctionUrlCorsOptions;
 import software.amazon.awscdk.services.lambda.FunctionUrlOptions;
 import software.amazon.awscdk.services.lambda.HttpMethod;
+import software.amazon.awscdk.services.lambda.nodejs.NodejsFunction;
 import software.constructs.Construct;
 
 public class CheckAgeLambdaStack extends Stack {
@@ -25,12 +26,11 @@ public class CheckAgeLambdaStack extends Stack {
 	public CheckAgeLambdaStack(final Construct parent, final String id, final StackProps props) {
 		super(parent, id, props);
 		// Defines a new lambda resource
-		final Function checkAge = Function.Builder.create(this, "CheckAgeHandler")
-				.runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_16_X) // execution environment
-				.code(Code.fromAsset("lambda-typescript/lib")) // code loaded from the "lambda" directory
-				.memorySize(64)
-				.handler("checkage.handler") // file is "hello", function is "handler"
-				.build();
+		
+		NodejsFunction checkAge = NodejsFunction.Builder.create(this, "CheckAgeHandler").entry("lambda-typescript/lib/check-age.ts")
+				.entry("handler").memorySize(64).build();
+		
+		
 		functionUrl = checkAge.addFunctionUrl(FunctionUrlOptions.builder().authType(FunctionUrlAuthType.NONE)
 				.cors(FunctionUrlCorsOptions.builder().allowedHeaders(Arrays.asList("*"))
 						.allowedMethods(Arrays.asList(HttpMethod.ALL)).allowedOrigins(Arrays.asList("*")).build())
