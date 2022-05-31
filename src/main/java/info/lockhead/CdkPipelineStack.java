@@ -31,7 +31,7 @@ public class CdkPipelineStack extends Stack {
 		Artifact sourceBuildOutput = new Artifact();
 
 		final CodePipeline pipeline = CodePipeline.Builder.create(this, getCodepipelineName(branch))
-				.pipelineName(getCodepipelineName(branch))
+				.pipelineName(getCodepipelineName(branch)).dockerEnabledForSynth(true)
 				.synth(CodeBuildStep.Builder.create("SynthStep")
 						.input(CodePipelineSource.connection("lock128/cdk-codepipeline-flutter", branch,
 								ConnectionSourceOptions.builder().connectionArn(connectionArn).build()))
