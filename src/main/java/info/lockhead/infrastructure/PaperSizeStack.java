@@ -1,23 +1,46 @@
 package info.lockhead.infrastructure;
 
+import java.util.Arrays;
+
+import org.jetbrains.annotations.NotNull;
+
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.services.lambda.Code;
 import software.amazon.awscdk.services.lambda.Function;
+import software.amazon.awscdk.services.lambda.FunctionUrl;
+import software.amazon.awscdk.services.lambda.FunctionUrlAuthType;
+import software.amazon.awscdk.services.lambda.FunctionUrlCorsOptions;
+import software.amazon.awscdk.services.lambda.FunctionUrlOptions;
+import software.amazon.awscdk.services.lambda.HttpMethod;
 import software.constructs.Construct;
 
 public class PaperSizeStack extends Stack {
-    public PaperSizeStack(final Construct parent, final String id) {
-        this(parent, id, null);
-    }
+	private FunctionUrl functionUrl;
 
-    public PaperSizeStack(final Construct parent, final String id, final StackProps props) {
-        super(parent, id, props);
-    // Defines a new lambda resource
-    final Function paperSize = Function.Builder.create(this, "PaperSizeStack")
-        .runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_14_X)    // execution environment
-        .code(Code.fromAsset("lambda-typescript-2/lib"))  // code loaded from the "lambda" directory
-        .handler("paper-size.handler")        // file is "hello", function is "handler"
-        .build();
-    }
+	public PaperSizeStack(final Construct parent, final String id) {
+		this(parent, id, null);
+	}
+
+	public PaperSizeStack(final Construct parent, final String id, final StackProps props) {
+		super(parent, id, props);
+		// Defines a new lambda resource
+		final Function paperSize = Function.Builder.create(this, "PaperSizeStack")
+				.runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_14_X) // execution environment
+				.code(Code.fromAsset("lambda-typescript-2/lib")) // code loaded from the "lambda" directory
+				.handler("paper-size.handler") // file is "hello", function is "handler"
+				.build();
+
+		functionUrl = paperSize.addFunctionUrl(FunctionUrlOptions.builder().authType(FunctionUrlAuthType.NONE)
+				.cors(FunctionUrlCorsOptions.builder().allowedHeaders(Arrays.asList("*"))
+						.allowedMethods(Arrays.asList(HttpMethod.ALL)).allowedOrigins(Arrays.asList("*")).build())
+				.build());
+	}
+
+	public String getFunctionUrl() {
+		if (functionUrl == null) {
+			return "";
+		}
+		return functionUrl.getUrl();
+	}
 }
