@@ -23,12 +23,11 @@ public class FlutterStack extends Stack {
     public FlutterStack(final Construct parent, final String id, final StackProps props) {
         super(parent, id, props);
 		LifecycleRule rule = LifecycleRule.builder().enabled(true).expiration(Duration.days(10)).build();
-		BucketProps appBucketProps = BucketProps.builder().bucketName("cdk-codepipeline-flutter")
+		BucketProps appBucketProps = BucketProps.builder().bucketName("cdk-codepipeline-flutter").websiteIndexDocument("index.html")
 				.blockPublicAccess(
 						BlockPublicAccess.Builder.create().blockPublicPolicy(false).blockPublicAcls(false).build()).publicReadAccess(false).versioned(false).lifecycleRules(Arrays.asList(rule))
 				.build();
 		deploymentBucket=new Bucket(this, "cdk-codepipeline-flutter", appBucketProps);
-		
     
     }
 
