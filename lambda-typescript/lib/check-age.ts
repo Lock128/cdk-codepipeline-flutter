@@ -2,9 +2,7 @@ interface InputEvent {
   Country: string;
 }
 
-export const handler = async (event: string): Promise<number> => {
-  //const { Country } = event;
-  const Country = event;
+export const handler = async (Country: string): Promise<number> => {
   if (Country=="Germany") {
     return 18;
   }
