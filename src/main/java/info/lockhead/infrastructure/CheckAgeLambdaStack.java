@@ -22,6 +22,12 @@ public class CheckAgeLambdaStack extends Stack {
 	public CheckAgeLambdaStack(final Construct parent, final String id) {
 		this(parent, id, null);
 	}
+	/*
+	 input event:
+	 {
+  	"Country": "Germany"
+	}
+	 */
 
 	public CheckAgeLambdaStack(final Construct parent, final String id, final StackProps props) {
 		super(parent, id, props);

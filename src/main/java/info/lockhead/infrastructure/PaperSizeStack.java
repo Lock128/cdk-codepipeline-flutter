@@ -23,7 +23,12 @@ public class PaperSizeStack extends Stack {
 	public PaperSizeStack(final Construct parent, final String id) {
 		this(parent, id, null);
 	}
-
+	/*
+	 input event:
+	 {
+ 	"Country": "Germany"
+	}
+	 */
 	public PaperSizeStack(final Construct parent, final String id, final StackProps props) {
 		super(parent, id, props);
 
