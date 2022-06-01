@@ -3,6 +3,9 @@ package info.lockhead;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.jetbrains.annotations.Nullable;
 
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
@@ -17,6 +20,9 @@ import software.amazon.awscdk.services.codebuild.BuildSpec;
 import software.amazon.awscdk.services.codebuild.LinuxBuildImage;
 import software.amazon.awscdk.services.codebuild.PipelineProject;
 import software.amazon.awscdk.services.codepipeline.Artifact;
+import software.amazon.awscdk.services.iam.Effect;
+import software.amazon.awscdk.services.iam.IRole;
+import software.amazon.awscdk.services.iam.PolicyStatement;
 import software.constructs.Construct;
 
 public class CdkPipelineStack extends Stack {
@@ -75,6 +81,29 @@ public class CdkPipelineStack extends Stack {
 												"aws s3 sync build/web s3://cdk-codepipeline-flutter"))
 										.build()))
 						.build());
+		
+		
+		
+		//allow additional permissions for role use for codebuild
+		@Nullable	
+		IRole role = pipeline.getPipeline().getRole();
+		role.addToPrincipalPolicy(
+				PolicyStatement.Builder.create().effect(Effect.ALLOW).resources(Arrays.asList("*"))
+						.actions(Arrays.asList("ssm:DescribeParameters", "ssm:GetParameters", "ssm:GetParameter",
+								"ssm:GetParameterHistory", "cloudformation:*", "s3:*", "apigateway:*", "acm:*", "iam:PassRole"))
+						.build());
+		Map<String, ? extends Object> conditions = new HashMap<String, Object>() {
+			{
+				put("ForAnyValue:StringEquals", new HashMap<String, String>() {
+					{
+						put("aws:CalledVia", "cloudformation.amazonaws.com");
+					}
+				});
+			}
+		};
+		role.addToPrincipalPolicy(PolicyStatement.Builder.create().effect(Effect.ALLOW).actions(Arrays.asList("*"))
+				.resources(Arrays.asList("*")).conditions(conditions).build());
+		
 
 	}
 

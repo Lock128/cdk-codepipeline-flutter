@@ -1,34 +1,37 @@
 
-export const handler = async (event): Promise<string> => {
-  const Country = event?.queryStringParameters?.Country;
+export const handler = async (event) => {
+  try {
+    const Country = event?.queryStringParameters?.Country;
+    const res = {
+      statusCode: 200,
+      body: `Not found country: ${Country}`
+    };
 
-  if (!verifyAllowedCountry(Country)) {
-    console.log(`Not found country: ${Country}`);
-    return "Unknown";
+    if (!verifyAllowedCountry(Country)) {
+      console.log(`Not found country: ${Country}`);
+      res.body = "Unknown";
+    }
+    if (Country == "Germany") {
+      res.body = "A4";
+    }
+    else if (Country == "USA") {
+      res.body = "Letter";
+    }
+    else if (Country == "Argentina") {
+      res.body = "A4";
+    } else {
+      console.log(`Not found country: ${Country}`);
+      console.log(`Event: ${event}`);
+    }
+    return res;
+  } catch (err) {
+    console.log(err);
+    const res = {
+      statusCode: 400,
+      body: JSON.stringify("Something went wrong!"),
+    };
+    return res;
   }
-  if (Country=="Germany") {
-    return "A4";
-  }
-  else if (Country=="USA") {
-    return "Letter";
-  }
-  else if (Country=="Argentina") {
-    return "A4";
-  }
-  console.log(`Not found country: ${Country}`);
-  return "Unknown";
-};
-
-
-let calculateMinAge = async function (Country: string): Promise<number> {
-  if (Country=="Germany") {
-    return 18;
-  }
-  else if (Country=="USA") {
-    return 21;
-  }
-  console.log(`Not found country: ${Country}`);
-  return -1;
 };
 
 let verifyAllowedCountry = function (Country: string): boolean {
