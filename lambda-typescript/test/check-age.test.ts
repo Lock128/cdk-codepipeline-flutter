@@ -8,7 +8,7 @@ test('CheckAgeInGermany', () => {
 
     test('CheckAgeInUSA', () => {
         expect.assertions(1);
-        expect(CheckAge.handler("USA})).resolves.toEqual(21);
+        expect(CheckAge.handler("USA")).resolves.toEqual(21);
         });
 
         test('CheckAgeInIndia', () => {
