@@ -8,7 +8,7 @@ export const handler = async (event) => {
     };
 
     if (!verifyAllowedCountry(Country)) {
-      console.log(`Not found country: ${Country}`);
+      console.log(`Allowed country not found: ${Country}`);
       res.body = "Unknown";
     }
 
