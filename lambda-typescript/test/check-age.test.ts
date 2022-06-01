@@ -11,7 +11,7 @@ test('CheckAgeInGermany', () => {
             "body": "18",
             "statusCode": 200
     }
-    expect(CheckAge.handler(input)).toEqual(output);
+    expect(CheckAge.handler(input)).resolves.toEqual(output);
 });
 test('CheckAgeInUSA', () => {
     const input = {
@@ -23,7 +23,7 @@ test('CheckAgeInUSA', () => {
             "body": "21",
             "statusCode": 200
     }
-    expect(CheckAge.handler(input)).toEqual(output);
+    expect(CheckAge.handler(input)).resolves.toEqual(output);
 });
 
 test('CheckAgeInIndia', () => {
@@ -36,7 +36,7 @@ test('CheckAgeInIndia', () => {
             "body": "-1",
             "statusCode": 200
     }
-    expect(CheckAge.handler(input)).toEqual(output);
+    expect(CheckAge.handler(input)).resolves.toEqual(output);
 });
 
 test('CheckAgeInSweden', () => {
@@ -49,5 +49,5 @@ test('CheckAgeInSweden', () => {
             "body": "18",
             "statusCode": 200
     }
-    expect(CheckAge.handler(input)).toEqual(output);
+    expect(CheckAge.handler(input)).resolves.toEqual(output);
 });
