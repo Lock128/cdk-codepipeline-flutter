@@ -1,6 +1,5 @@
-export const handler = (event) => {
+export const handler = async (event) => {
   try {
-
     const Country = event?.queryStringParameters?.Country;
 
     const res = {

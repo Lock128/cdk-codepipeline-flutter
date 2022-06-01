@@ -11,6 +11,7 @@ export const handler = async (event) => {
       console.log(`Not found country: ${Country}`);
       res.body = "Unknown";
     }
+
     if (Country == "Germany") {
       res.body = "A4";
     }
@@ -23,6 +24,7 @@ export const handler = async (event) => {
       console.log(`Not found country: ${Country}`);
       console.log(`Event: ${event}`);
     }
+
     return res;
   } catch (err) {
     console.log(err);
