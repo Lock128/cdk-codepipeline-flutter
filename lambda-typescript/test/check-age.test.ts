@@ -2,15 +2,52 @@ import * as CheckAge from '../lib/check-age';
 
 
 test('CheckAgeInGermany', () => {
-    expect.assertions(1);
-    expect(CheckAge.handler('{"queryStringParameters": {"Country": "Germany"}}')).resolves.toEqual(18);
+    const input = {
+        "queryStringParameters": {
+            "Country": "Germany"
+        }
+    }
+    const output = {
+            "body": "18",
+            "statusCode": 200
+    }
+    expect(CheckAge.handler(input)).toEqual(output);
 });
 test('CheckAgeInUSA', () => {
-    expect.assertions(1);
-    expect(CheckAge.handler("USA")).resolves.toEqual(21);
+    const input = {
+        "queryStringParameters": {
+            "Country": "USA"
+        }
+    }
+    const output = {
+            "body": "21",
+            "statusCode": 200
+    }
+    expect(CheckAge.handler(input)).toEqual(output);
 });
 
 test('CheckAgeInIndia', () => {
-    expect.assertions(1);
-    expect(CheckAge.handler("India")).resolves.toEqual(18);
+    const input = {
+        "queryStringParameters": {
+            "Country": "India"
+        }
+    }
+    const output = {
+            "body": "-1",
+            "statusCode": 200
+    }
+    expect(CheckAge.handler(input)).toEqual(output);
+});
+
+test('CheckAgeInSweden', () => {
+    const input = {
+        "queryStringParameters": {
+            "Country": "Sweden"
+        }
+    }
+    const output = {
+            "body": "18",
+            "statusCode": 200
+    }
+    expect(CheckAge.handler(input)).toEqual(output);
 });

@@ -1,4 +1,4 @@
-export const handler = async (event) => {
+export const handler = (event) => {
   try {
 
     const Country = event?.queryStringParameters?.Country;
