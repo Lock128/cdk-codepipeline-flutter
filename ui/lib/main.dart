@@ -42,6 +42,28 @@ Future<String> getPaperSize(String country) async {
   return "NOT FOUND";
 }
 
+//doCalculation is not yet working in this implementation
+Future<String> doCalculation(String calculationText) async {
+  http.Response response5;
+  try {
+    var details = {'action': 'plus', 'x': 0, 'y': 0};
+    details['x'] = 5;
+    details['y'] = 4;
+    Uri endpoint = Uri.https(
+        "4fx43iriy6x5omci5pwl4o2gyi0byalb.lambda-url.eu-central-1.on.aws", "");
+    response5 = await http.post(
+      endpoint,
+      body: details,
+    );
+
+    print("Return value 2: ${response5.body}");
+    return response5.body;
+  } catch (e) {
+    print(e.toString());
+  }
+  return "NOT FOUND";
+}
+
 void main() {
   runApp(const MyApp());
 }
@@ -93,6 +115,8 @@ class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   String _drivingAge = "-99";
   String _paperSize = "XX";
+  int _calculationResult = 0;
+
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -156,6 +180,26 @@ class _MyHomePageState extends State<MyHomePage> {
             }),
             Text(
               'Paper Size: ' + _paperSize,
+            ),
+            SizedBox(height: 50),
+            const Text(
+              'Calculation:',
+            ),
+            TextField(onChanged: (text) async {
+              print('calculation input: $text');
+              await doCalculation(text).then((value) async {
+                print(value);
+                setState(() {
+                  try {
+                    _calculationResult = int.parse(value);
+                  } on FormatException catch (e) {
+                    print(e);
+                  }
+                });
+              });
+            }),
+            Text(
+              'Calculation result: ' + _calculationResult.toString(),
             ),
           ],
         ),

@@ -36,8 +36,6 @@ public class CdkPipelineStack extends Stack {
 		super(parent, id, props);
 
 		String connectionArn = "arn:aws:codestar-connections:eu-central-1:916032256060:connection/12b42dad-052d-4e38-ad41-f96eccb43132";
-		Artifact sourceBuildOutput = new Artifact();
-
 		final CodePipeline pipeline = CodePipeline.Builder.create(this, getCodepipelineName(branch))
 				.pipelineName(getCodepipelineName(branch)).dockerEnabledForSynth(true)
 				.synth(CodeBuildStep.Builder.create("SynthStep")
@@ -50,40 +48,65 @@ public class CdkPipelineStack extends Stack {
 						.build())
 				.build();
 
-		pipeline.addStage(new CheckAgeLambdaStage(this, "DeployCheckAgeLambda"),
-				AddStageOpts.builder().pre(List.of(ShellStep.Builder.create("Execute TypescriptTests")
-						.commands(List.of("cd check-age", "npm install", "npm test", "ls -al", "ls -al coverage",
-								"cd ..", "ls -al check-age", "ls -al check-age", "bash start_codecov.sh"))
-						.build())).build());
-		pipeline.addStage(new PaperSizeStage(this, "DeployPaperSizeStage"),
-				AddStageOpts.builder().pre(List.of(ShellStep.Builder.create("Execute TypescriptTests 2nd function")
-						.commands(List.of("cd paper-size", "npm install", "npm test", "ls -al", "ls -al coverage",
-								"cd ..", "ls -al paper-size", "ls -al paper-size", "bash start_codecov.sh"))
-						.build())).build());
-		pipeline.addStage(new CalculatorStage(this, "DeployCalculatorStage"),
-				AddStageOpts.builder().pre(List.of(ShellStep.Builder.create("Build Calculator Lambda")
-						.commands(List.of("ls -al paper-size", "bash start_codecov.sh"))
-						.build())).build());
+		pipeline.addStage(new CheckAgeLambdaStage(this, "DeployCheckAgeLambda"), getCheckAgeStageOpts());
+		pipeline.addStage(new PaperSizeStage(this, "DeployPaperSizeStage"), getPaperSizeStageOpts());
+		pipeline.addStage(new CalculatorStage(this, "DeployCalculatorStage"), getCalculatorStageOpts());
 
-		PolicyStatement flutterDeployPermission = PolicyStatement.Builder.create().effect(Effect.ALLOW)
-				.resources(Arrays.asList("*"))
+		PolicyStatement flutterDeployPermission = getDeployPermissions();
+		CodeBuildStep buildAndDeployManual = CodeBuildStep.Builder.create("Execute Flutter Build and CodeCov")
+				.commands(getFlutterBuildShellSteps()).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
+				.build();
+
+		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
+				getFlutterStageOptions(buildAndDeployManual));
+
+	}
+
+	private PolicyStatement getDeployPermissions() {
+		return PolicyStatement.Builder.create().effect(Effect.ALLOW).resources(Arrays.asList("*"))
 				.actions(Arrays.asList("ssm:DescribeParameters", "ssm:GetParameters", "ssm:GetParameter",
 						"ssm:GetParameterHistory", "cloudformation:*", "s3:*", "apigateway:*", "acm:*", "iam:PassRole"))
 				.build();
-		CodeBuildStep buildAndDeployManual = CodeBuildStep.Builder.create("Execute Flutter Build and CodeCov")
-				.commands(List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
-						"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor",
-						"flutter doctor", "flutter devices", "cd ui", "flutter test", "flutter build web --verbose",
-						"bash ../start_codecov.sh", "aws s3 sync build/web s3://cdk-codepipeline-flutter"))
-				.rolePolicyStatements(Arrays.asList(flutterDeployPermission)).build();
+	}
 
-		StageDeployment stageDeployment = pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
-				AddStageOpts.builder().pre(List.of(ShellStep.Builder.create("Install Flutter")
+	private List<String> getFlutterBuildShellSteps() {
+		return List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
+				"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor", "flutter doctor",
+				"flutter devices", "cd ui", "flutter test", "flutter build web --verbose", "bash ../start_codecov.sh",
+				"aws s3 sync build/web s3://cdk-codepipeline-flutter");
+	}
+
+	private AddStageOpts getCheckAgeStageOpts() {
+		return AddStageOpts.builder()
+				.pre(List.of(ShellStep.Builder.create("Execute TypescriptTests")
+						.commands(List.of("cd check-age", "npm install", "npm test", "ls -al", "ls -al coverage",
+								"cd ..", "ls -al check-age", "ls -al check-age", "bash start_codecov.sh"))
+						.build()))
+				.build();
+	}
+
+	private AddStageOpts getPaperSizeStageOpts() {
+		return AddStageOpts.builder()
+				.pre(List.of(ShellStep.Builder.create("Execute TypescriptTests 2nd function")
+						.commands(List.of("cd paper-size", "npm install", "npm test", "ls -al", "ls -al coverage",
+								"cd ..", "ls -al paper-size", "ls -al paper-size", "bash start_codecov.sh"))
+						.build()))
+				.build();
+	}
+
+	private AddStageOpts getCalculatorStageOpts() {
+		return AddStageOpts.builder().pre(List.of(ShellStep.Builder.create("Build Calculator Lambda")
+				.commands(List.of("ls -al paper-size", "bash start_codecov.sh")).build())).build();
+	}
+
+	private AddStageOpts getFlutterStageOptions(CodeBuildStep buildAndDeployManual) {
+		return AddStageOpts.builder()
+				.pre(List.of(ShellStep.Builder.create("Install Flutter")
 						.commands(List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
 								"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor",
 								"flutter doctor", "flutter devices"))
-						.build())).post(List.of(buildAndDeployManual)).build());
-
+						.build()))
+				.post(List.of(buildAndDeployManual)).build();
 	}
 
 	private String getCodepipelineName(String branch) {
