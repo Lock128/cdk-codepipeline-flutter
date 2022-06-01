@@ -50,31 +50,20 @@ public class CdkPipelineStack extends Stack {
 						.build())
 				.build();
 
-		pipeline.addStage(new CheckAgeLambdaStage(this, "DeployLambdaFunction"),
-				AddStageOpts.builder()
-						.pre(List.of(ShellStep.Builder.create("Execute TypescriptTests")
-								.commands(List.of("cd lambda-typescript", "npm install", "npm test", "ls -al",
-										"ls -al coverage", "cd ..", "ls -al lambda-typescript",
-										"ls -al lambda-typescript-2", "bash start_codecov.sh"))
-								.build()))
-						.build());
-		pipeline.addStage(new PaperSizeStage(this, "PaperSizeStage"),
-				AddStageOpts.builder()
-						.pre(List.of(ShellStep.Builder.create("Execute TypescriptTests 2nd function")
-								.commands(List.of("cd lambda-typescript-2", "npm install", "npm test", "ls -al",
-										"ls -al coverage", "cd ..", "ls -al lambda-typescript",
-										"ls -al lambda-typescript-2", "bash start_codecov.sh"))
-								.build()))
-						.build());
-
-//		ShellStep buildAndDeploy = ShellStep.Builder.create("Execute Flutter Build and CodeCov")
-//				.commands(List.of(
-//						"git clone https://github.com/flutter/flutter.git -b stable --depth 1",
-//						"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache",
-//						"flutter doctor", "flutter doctor", "flutter devices", "cd ui",
-//						"flutter test", "flutter build web --verbose", "bash ../start_codecov.sh",
-//						"aws s3 sync build/web s3://cdk-codepipeline-flutter"))
-//				.build();
+		pipeline.addStage(new CheckAgeLambdaStage(this, "DeployCheckAgeLambda"),
+				AddStageOpts.builder().pre(List.of(ShellStep.Builder.create("Execute TypescriptTests")
+						.commands(List.of("cd check-age", "npm install", "npm test", "ls -al", "ls -al coverage",
+								"cd ..", "ls -al check-age", "ls -al check-age", "bash start_codecov.sh"))
+						.build())).build());
+		pipeline.addStage(new PaperSizeStage(this, "DeployPaperSizeStage"),
+				AddStageOpts.builder().pre(List.of(ShellStep.Builder.create("Execute TypescriptTests 2nd function")
+						.commands(List.of("cd paper-size", "npm install", "npm test", "ls -al", "ls -al coverage",
+								"cd ..", "ls -al paper-size", "ls -al paper-size", "bash start_codecov.sh"))
+						.build())).build());
+		pipeline.addStage(new CalculatorStage(this, "DeployCalculatorStage"),
+				AddStageOpts.builder().pre(List.of(ShellStep.Builder.create("Build Calculator Lambda")
+						.commands(List.of("ls -al paper-size", "bash start_codecov.sh"))
+						.build())).build());
 
 		PolicyStatement flutterDeployPermission = PolicyStatement.Builder.create().effect(Effect.ALLOW)
 				.resources(Arrays.asList("*"))
@@ -95,38 +84,6 @@ public class CdkPipelineStack extends Stack {
 								"flutter doctor", "flutter devices"))
 						.build())).post(List.of(buildAndDeployManual)).build());
 
-	}
-
-	private PipelineProject getTypescriptTestProject() {
-		PipelineProject lambdaBuild = PipelineProject.Builder.create(this, "TypeScriptLambdaTest")
-				.buildSpec(BuildSpec.fromObject(new HashMap<String, Object>() {
-					{
-						put("version", "0.2");
-						put("phases", new HashMap<String, Object>() {
-							{
-								put("install", new HashMap<String, List<String>>() {
-									{
-										put("commands", Arrays.asList("ls -al"));
-									}
-								});
-								put("build", new HashMap<String, List<String>>() {
-									{
-										put("commands", Arrays.asList("cd lambda-typescript", "npm test"));
-									}
-								});
-							}
-						});
-						put("artifacts", new HashMap<String, Object>() {
-							{
-								put("base-directory", "lambda-typescript/coverage");
-								put("files", Arrays.asList("**/*"));
-							}
-						});
-					}
-				})).environment(BuildEnvironment.builder().buildImage(LinuxBuildImage.AMAZON_LINUX_2_3).build())
-				.build();
-
-		return lambdaBuild;
 	}
 
 	private String getCodepipelineName(String branch) {

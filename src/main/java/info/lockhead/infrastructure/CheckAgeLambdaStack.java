@@ -32,8 +32,8 @@ public class CheckAgeLambdaStack extends Stack {
 	public CheckAgeLambdaStack(final Construct parent, final String id, final StackProps props) {
 		super(parent, id, props);
 		
-		NodejsFunction checkAge = NodejsFunction.Builder.create(this, "CheckAgeHandler").entry("lambda-typescript/lib/check-age.ts")
-				.handler("handler").memorySize(128).depsLockFilePath("lambda-typescript/package-lock.json").build();
+		NodejsFunction checkAge = NodejsFunction.Builder.create(this, "CheckAgeHandler").entry("check-age/lib/check-age.ts")
+				.handler("handler").memorySize(128).depsLockFilePath("check-age/package-lock.json").build();
 		
 //		final Function checkAge = Function.Builder.create(this, "CheckAgeHandler")
 //				.runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_16_X) // execution environment
