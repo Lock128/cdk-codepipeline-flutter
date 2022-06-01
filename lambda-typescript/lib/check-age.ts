@@ -1,7 +1,3 @@
-interface InputEvent {
-  Country: string;
-}
-
 export const handler = async (Country: string): Promise<number> => {
   if (Country=="Germany") {
     return 18;
@@ -14,27 +10,4 @@ export const handler = async (Country: string): Promise<number> => {
   }
   console.log(`Not found country: ${Country}`);
   return -1;
-};
-
-
-let calculateMinAge = async function (Country: string): Promise<number> {
-  if (Country=="Germany") {
-    return 18;
-  }
-  else if (Country=="USA") {
-    return 21;
-  }
-  else if (Country=="India") {
-    return 18;
-  }
-  else if (Country=="Argentina") {
-    return 18;
-  }
-  console.log(`Not found country: ${Country}`);
-  return -1;
-};
-
-let verifyAllowedCountry = function (Country: string): boolean {
-  let listAllowedCountries: Array<string> = ["Germany", "India", "USA", "Mexico", "Argentina"];
-  return listAllowedCountries.includes(Country);
 };
