@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import software.amazon.awscdk.Stack;
@@ -15,6 +16,7 @@ import software.amazon.awscdk.pipelines.CodePipeline;
 import software.amazon.awscdk.pipelines.CodePipelineSource;
 import software.amazon.awscdk.pipelines.ConnectionSourceOptions;
 import software.amazon.awscdk.pipelines.ShellStep;
+import software.amazon.awscdk.pipelines.StageDeployment;
 import software.amazon.awscdk.services.codebuild.BuildEnvironment;
 import software.amazon.awscdk.services.codebuild.BuildSpec;
 import software.amazon.awscdk.services.codebuild.LinuxBuildImage;
@@ -65,45 +67,33 @@ public class CdkPipelineStack extends Stack {
 								.build()))
 						.build());
 
-		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
+//		ShellStep buildAndDeploy = ShellStep.Builder.create("Execute Flutter Build and CodeCov")
+//				.commands(List.of(
+//						"git clone https://github.com/flutter/flutter.git -b stable --depth 1",
+//						"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache",
+//						"flutter doctor", "flutter doctor", "flutter devices", "cd ui",
+//						"flutter test", "flutter build web --verbose", "bash ../start_codecov.sh",
+//						"aws s3 sync build/web s3://cdk-codepipeline-flutter"))
+//				.build();
+
+		PolicyStatement flutterDeployPermission = PolicyStatement.Builder.create().effect(Effect.ALLOW)
+				.resources(Arrays.asList("*"))
+				.actions(Arrays.asList("ssm:DescribeParameters", "ssm:GetParameters", "ssm:GetParameter",
+						"ssm:GetParameterHistory", "cloudformation:*", "s3:*", "apigateway:*", "acm:*", "iam:PassRole"))
+				.build();
+		CodeBuildStep buildAndDeployManual = CodeBuildStep.Builder.create("Execute Flutter Build and CodeCov")
+				.commands(List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
+						"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor",
+						"flutter doctor", "flutter devices", "cd ui", "flutter test", "flutter build web --verbose",
+						"bash ../start_codecov.sh", "aws s3 sync build/web s3://cdk-codepipeline-flutter"))
+				.rolePolicyStatements(Arrays.asList(flutterDeployPermission)).build();
+
+		StageDeployment stageDeployment = pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
 				AddStageOpts.builder().pre(List.of(ShellStep.Builder.create("Install Flutter")
-						.commands(
-								List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
-										"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor",
-										"flutter doctor", "flutter devices"))
-						.build())).post(
-								List.of(ShellStep.Builder.create("Execute Flutter Build and CodeCov")
-										.commands(List.of(
-												"git clone https://github.com/flutter/flutter.git -b stable --depth 1",
-												"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache",
-												"flutter doctor", "flutter doctor", "flutter devices", "cd ui",
-												"flutter test", "flutter build web --verbose", "bash ../start_codecov.sh",
-												"aws s3 sync build/web s3://cdk-codepipeline-flutter"))
-										.build()))
-						.build());
-		
-		
-		
-		//allow additional permissions for role use for codebuild
-		@Nullable	
-		IRole role = pipeline.getPipeline().getRole();
-		role.addToPrincipalPolicy(
-				PolicyStatement.Builder.create().effect(Effect.ALLOW).resources(Arrays.asList("*"))
-						.actions(Arrays.asList("ssm:DescribeParameters", "ssm:GetParameters", "ssm:GetParameter",
-								"ssm:GetParameterHistory", "cloudformation:*", "s3:*", "apigateway:*", "acm:*", "iam:PassRole"))
-						.build());
-		Map<String, ? extends Object> conditions = new HashMap<String, Object>() {
-			{
-				put("ForAnyValue:StringEquals", new HashMap<String, String>() {
-					{
-						put("aws:CalledVia", "cloudformation.amazonaws.com");
-					}
-				});
-			}
-		};
-		role.addToPrincipalPolicy(PolicyStatement.Builder.create().effect(Effect.ALLOW).actions(Arrays.asList("*"))
-				.resources(Arrays.asList("*")).conditions(conditions).build());
-		
+						.commands(List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
+								"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor",
+								"flutter doctor", "flutter devices"))
+						.build())).post(List.of(buildAndDeployManual)).build());
 
 	}
 
