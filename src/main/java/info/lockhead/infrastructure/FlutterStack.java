@@ -14,22 +14,23 @@ import software.amazon.awscdk.services.s3.LifecycleRule;
 import software.constructs.Construct;
 
 public class FlutterStack extends Stack {
-    private Bucket deploymentBucket;
+	private Bucket deploymentBucket;
 
 	public FlutterStack(final Construct parent, final String id) {
-        this(parent, id, null);
-    }
+		this(parent, id, null);
+	}
 
-    public FlutterStack(final Construct parent, final String id, final StackProps props) {
-        super(parent, id, props);
+	public FlutterStack(final Construct parent, final String id, final StackProps props) {
+		super(parent, id, props);
 		LifecycleRule rule = LifecycleRule.builder().enabled(true).expiration(Duration.days(10)).build();
-		BucketProps appBucketProps = BucketProps.builder().bucketName("cdk-codepipeline-flutter").websiteIndexDocument("index.html")
+		BucketProps appBucketProps = BucketProps.builder().bucketName("cdk-codepipeline-flutter")
+				.websiteIndexDocument("index.html")
 				.blockPublicAccess(
-						BlockPublicAccess.Builder.create().blockPublicPolicy(false).blockPublicAcls(false).build()).publicReadAccess(false).versioned(false).lifecycleRules(Arrays.asList(rule))
-				.build();
-		deploymentBucket=new Bucket(this, "cdk-codepipeline-flutter", appBucketProps);
-    
-    }
+						BlockPublicAccess.Builder.create().blockPublicPolicy(false).blockPublicAcls(false).build())
+				.publicReadAccess(true).versioned(false).lifecycleRules(Arrays.asList(rule)).build();
+		deploymentBucket = new Bucket(this, "cdk-codepipeline-flutter", appBucketProps);
+
+	}
 
 	public Bucket getDeploymentBucket() {
 		return deploymentBucket;
