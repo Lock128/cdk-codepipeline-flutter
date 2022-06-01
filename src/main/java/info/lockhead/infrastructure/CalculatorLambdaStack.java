@@ -29,8 +29,8 @@ public class CalculatorLambdaStack extends Stack {
 	public CalculatorLambdaStack(final Construct parent, final String id, final StackProps props) {
 		super(parent, id, props);
 
-		Function calculator = Function.Builder.create(this, "CalculatorLambdaHandler").code(Code.fromAsset("calculator/calculator.py"))
-				.handler("lambda_handler").memorySize(128).runtime(Runtime.PYTHON_3_9).build();
+		Function calculator = Function.Builder.create(this, "CalculatorLambdaHandler").code(Code.fromAsset("calculator"))
+				.handler("calculator.lambda_handler").memorySize(128).runtime(Runtime.PYTHON_3_9).build();
 
 		functionUrl = calculator.addFunctionUrl(FunctionUrlOptions.builder().authType(FunctionUrlAuthType.NONE)
 				.cors(FunctionUrlCorsOptions.builder().allowedHeaders(Arrays.asList("*"))
