@@ -1,4 +1,46 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+//https://5j552oravrqyecwbvrwt5izpy40remkd.lambda-url.eu-central-1.on.aws/ - checkage
+
+Future<String> getMinimalDrivingAge(String country) async {
+  http.Response response5;
+  try {
+    Map<String, String> queryParameters = new Map<String, String>();
+    queryParameters.putIfAbsent("Country", () => country);
+    Uri endpoint = Uri.https(
+        "5j552oravrqyecwbvrwt5izpy40remkd.lambda-url.eu-central-1.on.aws",
+        "",
+        queryParameters);
+    response5 = await http.get(endpoint);
+    print("Return value 1: ${response5.body}");
+    return response5.body;
+  } catch (e) {
+    print(e.toString());
+  }
+  return "NOT FOUND";
+}
+
+//https://tcmkvmtjvhr6iiseids252lbd40jyslp.lambda-url.eu-central-1.on.aws/
+//https://tcmkvmtjvhr6iiseids252lbd40jyslp.lambda-url.eu-central-1.on.aws/ - paperSize
+Future<String> getPaperSize(String country) async {
+  http.Response response5;
+  try {
+    Map<String, String> queryParameters = new Map<String, String>();
+    queryParameters.putIfAbsent("Country", () => country);
+    Uri endpoint = Uri.https(
+        "tcmkvmtjvhr6iiseids252lbd40jyslp.lambda-url.eu-central-1.on.aws",
+        "",
+        queryParameters);
+    response5 = await http.get(endpoint);
+    print("Return value 2: ${response5.body}");
+    return response5.body;
+  } catch (e) {
+    print(e.toString());
+  }
+  return "NOT FOUND";
+}
 
 void main() {
   runApp(const MyApp());
@@ -102,7 +144,25 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
-            const Image(image: AssetImage('images/header.gif'))
+            const Image(image: AssetImage('images/header.gif')),
+            const Text(
+              'Driving Age:',
+            ),
+            TextField(onChanged: (text) async {
+              print('First text field: $text');
+              await getMinimalDrivingAge(text).then((value) async {
+                print(jsonDecode(value));
+              });
+            }),
+            const Text(
+              'Paper Size:',
+            ),
+            TextField(onChanged: (text) async {
+              print('Second text field: $text');
+              await getPaperSize(text).then((value) async {
+                print(jsonDecode(value));
+              });
+            }),
           ],
         ),
       ),
