@@ -3,11 +3,7 @@ import * as CheckAge from '../lib/check-age';
 
 test('CheckAgeInGermany', () => {
     expect.assertions(1);
-    expect(CheckAge.handler('{"queryStringParameters": {"Country": "Germany"}}')).objectContaining({
-        body: expect("18"),
-        statusCode: expect(200),
-      });
-    });
+    expect(CheckAge.handler('{"queryStringParameters": {"Country": "Germany"}}')).resolves.toEqual(18);
 
     test('CheckAgeInUSA', () => {
         expect.assertions(1);
