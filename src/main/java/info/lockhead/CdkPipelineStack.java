@@ -71,8 +71,8 @@ public class CdkPipelineStack extends Stack {
 												"git clone https://github.com/flutter/flutter.git -b stable --depth 1",
 												"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache",
 												"flutter doctor", "flutter doctor", "flutter devices", "cd ui",
-												"flutter test", "flutter build web", "bash ../start_codecov.sh",
-												"aws s3 sync ui/build/web s3://cdk-codepipeline-flutter"))
+												"flutter test", "flutter build web --verbose", "bash ../start_codecov.sh",
+												"aws s3 sync ui/build/web/* s3://cdk-codepipeline-flutter"))
 										.build()))
 						.build());
 
