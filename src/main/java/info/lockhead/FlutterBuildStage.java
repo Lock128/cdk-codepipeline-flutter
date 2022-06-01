@@ -14,7 +14,6 @@ public class FlutterBuildStage extends Stage {
         super(scope, id, props);
 
         FlutterStack flutterStack = new FlutterStack(this, "FlutterStack");
-        flutterStack.getDeploymentBucket().grantReadWrite(null);
         
     }
 }
