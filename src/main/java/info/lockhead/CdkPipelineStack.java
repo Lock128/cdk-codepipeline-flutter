@@ -72,7 +72,7 @@ public class CdkPipelineStack extends Stack {
 												"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache",
 												"flutter doctor", "flutter doctor", "flutter devices", "cd ui",
 												"flutter test", "flutter build web --verbose", "bash ../start_codecov.sh",
-												"aws s3 sync ui/build/web/* s3://cdk-codepipeline-flutter"))
+												"aws s3 sync build/web/* s3://cdk-codepipeline-flutter"))
 										.build()))
 						.build());
 
