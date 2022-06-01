@@ -1,13 +1,35 @@
-export const handler = async (Country: string): Promise<number> => {
+export const handler = async (event) => {
+  try {
+
+  const Country = event?.queryStringParameters?.Country;
+
+  const res = {
+    statusCode: 200,
+    body: "-1"
+    ,
+  };
+
   if (Country=="Germany") {
-    return 18;
+    res.body = "18";
   }
   else if (Country=="USA") {
-    return 21;
+    res.body = "21";
   }
   else if (Country=="Sweden") {
-    return 18;
+    res.body = "18";
+  } else {
+    console.log(`Not found country: ${Country}`);
   }
-  console.log(`Not found country: ${Country}`);
-  return -1;
+
+
+  return res;
+} catch (err) {
+  console.log(err);
+  const res = {
+    statusCode: 400,
+    body: JSON.stringify("Something went wrong!"),
+  };
+  return res;
+}
+
 };

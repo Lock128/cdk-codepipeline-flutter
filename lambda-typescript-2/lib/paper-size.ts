@@ -1,9 +1,7 @@
-interface InputEvent {
-  Country: string;
-}
 
-export const handler = async (event: InputEvent): Promise<string> => {
-  const { Country } = event;
+export const handler = async (event): Promise<string> => {
+  const Country = event?.queryStringParameters?.Country;
+
   if (!verifyAllowedCountry(Country)) {
     console.log(`Not found country: ${Country}`);
     return "Unknown";
