@@ -2,16 +2,41 @@ import * as PaperSize from '../lib/paper-size';
 
 
 test('PaperSizeInGermany', () => {
-    expect.assertions(1);
-    expect(PaperSize.handler({ Country: "Germany" })).resolves.toEqual("A4");
+    const input = {
+        "queryStringParameters": {
+            "Country": "Germany"
+        }
+    }
+    const output = {
+            "body": "A4",
+            "statusCode": 200
+    }
+    expect(PaperSize.handler(input)).resolves.toEqual(output);
 });
 
 test('PaperSizeInUSA', () => {
-    expect.assertions(1);
-    expect(PaperSize.handler({ Country: "USA" })).resolves.toEqual("Letter");
+    const input = {
+        "queryStringParameters": {
+            "Country": "USA"
+        }
+    }
+    const output = {
+            "body": "Letter",
+            "statusCode": 200
+    }
+    expect(PaperSize.handler(input)).resolves.toEqual(output);
 });
 
 test('PaperSizeInIndia', () => {
-    expect.assertions(1);
-    expect(PaperSize.handler({ Country: "India" })).resolves.toEqual("Unknown");
+
+    const input = {
+        "queryStringParameters": {
+            "Country": "India"
+        }
+    }
+    const output = {
+            "body": "Unknown",
+            "statusCode": 200
+    }
+    expect(PaperSize.handler(input)).resolves.toEqual(output);
 });
