@@ -1,3 +1,3 @@
 #/bin/bash
-CODECOV_TOKEN=07ff113b-377c-4ad7-bae4-0d984e70b2a8
+CODECOV_TOKEN=479d7e35-a9e1-4085-ba42-90f824d5f605
 bash <(curl -s https://codecov.io/bash) -t $CODECOV_TOKEN
