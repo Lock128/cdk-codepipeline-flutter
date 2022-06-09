@@ -15,7 +15,9 @@ import software.amazon.awscdk.pipelines.CodePipeline;
 import software.amazon.awscdk.pipelines.CodePipelineSource;
 import software.amazon.awscdk.pipelines.ConnectionSourceOptions;
 import software.amazon.awscdk.pipelines.ShellStep;
+import software.amazon.awscdk.services.codebuild.BuildEnvironment;
 import software.amazon.awscdk.services.codebuild.BuildSpec;
+import software.amazon.awscdk.services.codebuild.LinuxBuildImage;
 import software.amazon.awscdk.services.iam.Effect;
 import software.amazon.awscdk.services.iam.PolicyStatement;
 import software.constructs.Construct;
@@ -54,7 +56,7 @@ public class CdkPipelineStack extends Stack {
 		installSpec.put("install", runtimeVersion);
 		Map<String, Object> buildSpec = new TreeMap<String, Object>();
 		buildSpec.put("phases", installSpec);
-		CodeBuildStep buildAndDeployManual = CodeBuildStep.Builder.create("Execute Flutter Build and CodeCov")
+		CodeBuildStep buildAndDeployManual = CodeBuildStep.Builder.create("Execute Flutter Build and CodeCov").buildEnvironment(BuildEnvironment.builder().buildImage(LinuxBuildImage.AMAZON_LINUX_2_3).build())
 				.partialBuildSpec(BuildSpec.fromObject(buildSpec)).installCommands(getFlutterInstallCommands())
 				.commands(getFlutterBuildShellSteps()).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
 				.installCommands(getFlutterBuildShellSteps()).build();
