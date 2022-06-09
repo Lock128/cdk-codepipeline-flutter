@@ -72,7 +72,7 @@ public class CdkPipelineStack extends Stack {
 	private List<String> getFlutterBuildShellSteps() {
 		return List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
 				"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor", "flutter doctor",
-				"flutter devices", "cd ui", "flutter test", "flutter build web --verbose", "bash ../start_codecov.sh",
+				"flutter devices", "cd ui", "flutter test", "flutter build web --verbose", "flutter build apk --no-shrink", "bash ../start_codecov.sh",
 				"aws s3 sync build/web s3://cdk-codepipeline-flutter");
 	}
 
