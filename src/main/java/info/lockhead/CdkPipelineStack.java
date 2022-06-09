@@ -73,7 +73,7 @@ public class CdkPipelineStack extends Stack {
 		return List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
 				"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor", "flutter doctor",
 				"flutter devices", "cd ui", "flutter test", "flutter build web --verbose", "flutter build apk --no-shrink", "bash ../start_codecov.sh",
-				"aws s3 sync build/web s3://cdk-codepipeline-flutter");
+				"aws s3 sync build/web s3://cdk-codepipeline-flutter", "aws s3 sync build/app s3://cdk-codepipeline-flutter-apk");
 	}
 
 	private AddStageOpts getCheckAgeStageOpts() {
@@ -103,8 +103,7 @@ public class CdkPipelineStack extends Stack {
 		return AddStageOpts.builder()
 				.pre(List.of(ShellStep.Builder.create("Install Flutter")
 						.commands(List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
-								"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor",
-								"flutter doctor", "flutter devices"))
+								"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor", "flutter devices"))
 						.build()))
 				.post(List.of(buildAndDeployManual)).build();
 	}
