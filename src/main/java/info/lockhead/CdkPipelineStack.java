@@ -59,7 +59,7 @@ public class CdkPipelineStack extends Stack {
 		CodeBuildStep buildAndDeployManual = CodeBuildStep.Builder.create("Execute Flutter Build and CodeCov").buildEnvironment(BuildEnvironment.builder().buildImage(LinuxBuildImage.AMAZON_LINUX_2_3).build())
 				.partialBuildSpec(BuildSpec.fromObject(buildSpec)).installCommands(getFlutterInstallCommands())
 				.commands(getFlutterBuildShellSteps()).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
-				.installCommands(getFlutterBuildShellSteps()).build();
+				.build();
 
 		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
 				getFlutterStageOptions(buildAndDeployManual));
