@@ -50,19 +50,24 @@ public class CdkPipelineStack extends Stack {
 		PolicyStatement flutterDeployPermission = getDeployPermissions();
 		Map<String, Object> android = new TreeMap<String, Object>();
 		android.put("android", "latest");
+		android.put("java", "corretto11");
 		Map<String, Object> runtimeVersion = new TreeMap<String, Object>();
 		runtimeVersion.put("runtime-versions", android);
 		Map<String, Object> installSpec = new TreeMap<String, Object>();
 		installSpec.put("install", runtimeVersion);
 		Map<String, Object> buildSpec = new TreeMap<String, Object>();
 		buildSpec.put("phases", installSpec);
-		CodeBuildStep buildAndDeployManual = CodeBuildStep.Builder.create("Execute Flutter Build and CodeCov").buildEnvironment(BuildEnvironment.builder().buildImage(LinuxBuildImage.AMAZON_LINUX_2_3).build())
+		CodeBuildStep buildAndDeployManual = CodeBuildStep.Builder.create("Execute Flutter Build and CodeCov")
+				.buildEnvironment(BuildEnvironment.builder().buildImage(LinuxBuildImage.AMAZON_LINUX_2_3).build())
 				.partialBuildSpec(BuildSpec.fromObject(buildSpec)).installCommands(getFlutterInstallCommands())
 				.commands(getFlutterBuildShellSteps()).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
 				.build();
+		CodeBuildStep startiOsBuild = CodeBuildStep.Builder.create("Start iOS build on Codemagic")
+				.commands(List.of("pwd")).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
+				.build();
 
 		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
-				getFlutterStageOptions(buildAndDeployManual));
+				getFlutterStageOptions(buildAndDeployManual,startiOsBuild));
 
 	}
 
@@ -107,10 +112,10 @@ public class CdkPipelineStack extends Stack {
 				.commands(List.of("ls -al paper-size", "bash start_codecov.sh")).build())).build();
 	}
 
-	private AddStageOpts getFlutterStageOptions(CodeBuildStep buildAndDeployManual) {
+	private AddStageOpts getFlutterStageOptions(CodeBuildStep buildAndDeployManual, CodeBuildStep startiOsBuild) {
 		return AddStageOpts.builder()
 				.pre(List.of(ShellStep.Builder.create("Install Flutter").commands(getFlutterInstallCommands()).build()))
-				.post(List.of(buildAndDeployManual)).build();
+				.post(List.of(buildAndDeployManual, startiOsBuild)).build();
 	}
 
 	private String getCodepipelineName(String branch) {
