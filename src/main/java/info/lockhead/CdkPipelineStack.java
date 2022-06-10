@@ -63,11 +63,10 @@ public class CdkPipelineStack extends Stack {
 				.commands(getFlutterBuildShellSteps()).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
 				.build();
 		CodeBuildStep startiOsBuild = CodeBuildStep.Builder.create("Start iOS build on Codemagic")
-				.commands(List.of("pwd")).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
-				.build();
+				.commands(List.of("pwd")).rolePolicyStatements(Arrays.asList(flutterDeployPermission)).build();
 
 		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
-				getFlutterStageOptions(buildAndDeployManual,startiOsBuild));
+				getFlutterStageOptions(buildAndDeployManual, startiOsBuild));
 
 	}
 
