@@ -15,7 +15,7 @@ class FlutterStackTest {
 		FlutterStack uxStack = new FlutterStack(app, "pb-hw-test-stack");
 
 		Template template = Template.fromStack(uxStack);
-		template.resourceCountIs("AWS::S3::Bucket", 1);
+		template.resourceCountIs("AWS::S3::Bucket", 2);
 	}
 
 }

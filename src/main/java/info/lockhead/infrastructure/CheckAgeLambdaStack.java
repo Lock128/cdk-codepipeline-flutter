@@ -35,12 +35,6 @@ public class CheckAgeLambdaStack extends Stack {
 		NodejsFunction checkAge = NodejsFunction.Builder.create(this, "CheckAgeHandler").entry("check-age/lib/check-age.ts")
 				.handler("handler").memorySize(128).depsLockFilePath("check-age/package-lock.json").build();
 		
-//		final Function checkAge = Function.Builder.create(this, "CheckAgeHandler")
-//				.runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_16_X) // execution environment
-//				.code(Code.fromAsset("lambda-typescript/lib")) // code loaded from the "lambda" directory
-//				.memorySize(64).handler("check-age.handler") // file is "hello", function is "handler"
-//				.build();
-		
 		functionUrl = checkAge.addFunctionUrl(FunctionUrlOptions.builder().authType(FunctionUrlAuthType.NONE)
 				.cors(FunctionUrlCorsOptions.builder().allowedHeaders(Arrays.asList("*"))
 						.allowedMethods(Arrays.asList(HttpMethod.ALL)).allowedOrigins(Arrays.asList("*")).build())

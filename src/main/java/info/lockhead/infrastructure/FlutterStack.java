@@ -15,6 +15,7 @@ import software.constructs.Construct;
 
 public class FlutterStack extends Stack {
 	private Bucket deploymentBucket;
+	private Bucket apkBucket;
 
 	public FlutterStack(final Construct parent, final String id) {
 		this(parent, id, null);
@@ -29,11 +30,20 @@ public class FlutterStack extends Stack {
 						BlockPublicAccess.Builder.create().blockPublicPolicy(false).blockPublicAcls(false).build())
 				.publicReadAccess(true).versioned(false).lifecycleRules(Arrays.asList(rule)).build();
 		deploymentBucket = new Bucket(this, "cdk-codepipeline-flutter", appBucketProps);
+		BucketProps appApkBucketProps = BucketProps.builder().bucketName("cdk-codepipeline-flutter-apk")
+				.websiteIndexDocument("index.html")
+				.blockPublicAccess(
+						BlockPublicAccess.Builder.create().blockPublicPolicy(false).blockPublicAcls(false).build())
+				.publicReadAccess(false).versioned(false).lifecycleRules(Arrays.asList(rule)).build();
+		apkBucket = new Bucket(this, "cdk-codepipeline-flutter-apk", appApkBucketProps);
 
 	}
 
 	public Bucket getDeploymentBucket() {
 		return deploymentBucket;
+	}
+	public Bucket getApkBucket() {
+		return apkBucket;
 	}
 
 }
