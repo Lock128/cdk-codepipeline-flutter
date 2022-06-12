@@ -42,17 +42,23 @@ public class FlutterStack extends Stack {
 						BlockPublicAccess.Builder.create().blockPublicPolicy(false).blockPublicAcls(false).build())
 				.publicReadAccess(false).versioned(false).lifecycleRules(Arrays.asList(rule)).build();
 		apkBucket = new Bucket(this, "cdk-codepipeline-flutter-apk", appApkBucketProps);
-		
-		NodejsFunction iOsBuild = NodejsFunction.Builder.create(this, "TriggerIOSBuildHandler").entry("ios-build/lib/ios-build.ts")
-				.handler("handler").memorySize(128).depsLockFilePath("ios-build/package-lock.json").build();
-		
-		iOsBuild.addEventSource(SnsEventSource.Builder.create((ITopic) cdkPipelineStack.getSnsTopic()).build());
+
+		NodejsFunction iOsBuild = NodejsFunction.Builder.create(this, "TriggerIOSBuildHandler")
+				.entry("ios-build/lib/ios-build.ts").handler("handler").memorySize(128)
+				.depsLockFilePath("ios-build/package-lock.json").build();
+
+		if (cdkPipelineStack != null && cdkPipelineStack.getSnsTopic() != null) {
+			iOsBuild.addEventSource(SnsEventSource.Builder.create((ITopic) cdkPipelineStack.getSnsTopic()).build());
+		} else {
+			System.err.println("Error adding EventSource - cdkPipelineStack=" + cdkPipelineStack);
+		}
 
 	}
 
 	public Bucket getDeploymentBucket() {
 		return deploymentBucket;
 	}
+
 	public Bucket getApkBucket() {
 		return apkBucket;
 	}
