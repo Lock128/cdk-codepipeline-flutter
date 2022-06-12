@@ -50,7 +50,7 @@ public class CdkPipelineStack extends Stack {
 		PolicyStatement flutterDeployPermission = getDeployPermissions();
 		Map<String, Object> android = new TreeMap<String, Object>();
 		android.put("android", "latest");
-		android.put("java", "corretto11");
+		android.put("java", "corretto8");
 		Map<String, Object> runtimeVersion = new TreeMap<String, Object>();
 		runtimeVersion.put("runtime-versions", android);
 		Map<String, Object> installSpec = new TreeMap<String, Object>();
