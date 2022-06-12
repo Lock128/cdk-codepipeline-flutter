@@ -18,8 +18,15 @@ import software.amazon.awscdk.pipelines.ShellStep;
 import software.amazon.awscdk.services.codebuild.BuildEnvironment;
 import software.amazon.awscdk.services.codebuild.BuildSpec;
 import software.amazon.awscdk.services.codebuild.LinuxBuildImage;
+import software.amazon.awscdk.services.codestarnotifications.CfnNotificationRule;
+import software.amazon.awscdk.services.codestarnotifications.CfnNotificationRule.TargetProperty;
+import software.amazon.awscdk.services.codestarnotifications.INotificationRuleTarget;
+import software.amazon.awscdk.services.events.targets.SnsTopic;
 import software.amazon.awscdk.services.iam.Effect;
 import software.amazon.awscdk.services.iam.PolicyStatement;
+import software.amazon.awscdk.services.iam.ServicePrincipal;
+import software.amazon.awscdk.services.sns.Topic;
+import software.amazon.awscdk.services.sns.subscriptions.EmailSubscription;
 import software.constructs.Construct;
 
 public class CdkPipelineStack extends Stack {
@@ -34,7 +41,7 @@ public class CdkPipelineStack extends Stack {
 		final CodePipeline pipeline = CodePipeline.Builder.create(this, getCodepipelineName(branch))
 				.pipelineName(getCodepipelineName(branch)).dockerEnabledForSynth(true)
 				.synth(CodeBuildStep.Builder.create("SynthStep")
-						.input(CodePipelineSource.connection("lock128/cdk-codepipeline-flutter", branch,
+						.input(CodePipelineSource.connection("Lock128/cdk-codepipeline-flutter", branch,
 								ConnectionSourceOptions.builder().connectionArn(connectionArn).build()))
 						.installCommands(List.of("npm install -g aws-cdk" // Commands to run before build
 						)).commands(List.of("mvn test", "mvn package", // Language-specific build commands
@@ -63,10 +70,21 @@ public class CdkPipelineStack extends Stack {
 				.commands(getFlutterBuildShellSteps()).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
 				.build();
 		CodeBuildStep startiOsBuild = CodeBuildStep.Builder.create("Start iOS build on Codemagic")
-				.commands(List.of("pwd")).rolePolicyStatements(Arrays.asList(flutterDeployPermission)).build();
+				.commands(List.of("pwd", "ls -al")).rolePolicyStatements(Arrays.asList(flutterDeployPermission)).build();
 
 		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
 				getFlutterStageOptions(buildAndDeployManual, startiOsBuild));
+		
+		SnsTopic snsTopic = SnsTopic.Builder.create(Topic.Builder.create(this, "pipelineNotificationTopic-flutterbuild")
+				.topicName("DeliveryPipelineTopic-flutterbuild").build()).build();
+		snsTopic.getTopic().addToResourcePolicy(PolicyStatement.Builder.create().sid("AllowCodestarNotifications")
+				.effect(Effect.ALLOW).actions(Arrays.asList("SNS:Publish")).resources(Arrays.asList("*"))
+				.principals(Arrays.asList(new ServicePrincipal("codestar-notifications.amazonaws.com"))).build());
+
+		snsTopic.getTopic().addSubscription(EmailSubscription.Builder.create("lockhead@lockhead.net").build());
+
+		pipeline.getPipeline().notifyOnAnyStageStateChange(id, Topic.fromTopicArn(this, "snstopicPipelineNotification", snsTopic.getTopic().getTopicArn()));
+		
 
 	}
 
