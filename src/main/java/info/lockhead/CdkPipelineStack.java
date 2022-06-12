@@ -18,6 +18,7 @@ import software.amazon.awscdk.pipelines.ShellStep;
 import software.amazon.awscdk.services.codebuild.BuildEnvironment;
 import software.amazon.awscdk.services.codebuild.BuildSpec;
 import software.amazon.awscdk.services.codebuild.LinuxBuildImage;
+import software.amazon.awscdk.services.codepipeline.Pipeline;
 import software.amazon.awscdk.services.codestarnotifications.CfnNotificationRule;
 import software.amazon.awscdk.services.codestarnotifications.CfnNotificationRule.TargetProperty;
 import software.amazon.awscdk.services.codestarnotifications.INotificationRuleTarget;
@@ -70,11 +71,12 @@ public class CdkPipelineStack extends Stack {
 				.commands(getFlutterBuildShellSteps()).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
 				.build();
 		CodeBuildStep startiOsBuild = CodeBuildStep.Builder.create("Start iOS build on Codemagic")
-				.commands(List.of("pwd", "ls -al")).rolePolicyStatements(Arrays.asList(flutterDeployPermission)).build();
+				.commands(List.of("pwd", "ls -al")).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
+				.build();
 
 		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
 				getFlutterStageOptions(buildAndDeployManual, startiOsBuild));
-		
+
 		SnsTopic snsTopic = SnsTopic.Builder.create(Topic.Builder.create(this, "pipelineNotificationTopic-flutterbuild")
 				.topicName("DeliveryPipelineTopic-flutterbuild").build()).build();
 		snsTopic.getTopic().addToResourcePolicy(PolicyStatement.Builder.create().sid("AllowCodestarNotifications")
@@ -83,8 +85,18 @@ public class CdkPipelineStack extends Stack {
 
 		snsTopic.getTopic().addSubscription(EmailSubscription.Builder.create("lockhead@lockhead.net").build());
 
-		pipeline.getPipeline().notifyOnAnyStageStateChange(id, Topic.fromTopicArn(this, "snstopicPipelineNotification", snsTopic.getTopic().getTopicArn()));
-		
+		try {
+			Pipeline detailedPipeline = pipeline.getPipeline();
+			detailedPipeline.notifyOnAnyStageStateChange(id,
+					Topic.fromTopicArn(this, "snstopicPipelineNotification", snsTopic.getTopic().getTopicArn()));
+		} catch (Exception e) {
+			if (e.getLocalizedMessage().contains("Pipeline not created yet")) {
+				System.err.println("Error attaching notification to pipeline - pipeline not yet created");
+				e.printStackTrace();
+			} else {
+				throw e;
+			}
+		}
 
 	}
 
@@ -101,7 +113,8 @@ public class CdkPipelineStack extends Stack {
 	}
 
 	private List<String> getFlutterBuildShellSteps() {
-		return List.of("cd ui", "flutter test", "flutter build web --verbose", "flutter build apk --no-shrink",
+		return List.of("sudo yum install java-11-amazon-corretto-headless", "sudo alternatives --config java", "cd ui",
+				"flutter test", "flutter build web --verbose", "flutter build apk --no-shrink",
 				"bash ../start_codecov.sh", "aws s3 sync build/web s3://cdk-codepipeline-flutter",
 				"aws s3 sync build/app s3://cdk-codepipeline-flutter-apk");
 	}

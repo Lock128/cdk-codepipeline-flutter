@@ -1,6 +1,6 @@
 # exampleui
 
-A new Flutter project.
+A simple flutter project that is used to showcase a build using Codebuild.
 
 ## Getting Started
 
