@@ -10,10 +10,10 @@ public class FlutterBuildStage extends Stage {
         this(scope, id, null);
     }
 
-    public FlutterBuildStage(final Construct scope, final String id, final StageProps props) {
-        super(scope, id, props);
+    public FlutterBuildStage(final Construct scope, final String id, final CdkPipelineStack cdkPipelineStack) {
+        super(scope, id);
 
-        FlutterStack flutterStack = new FlutterStack(this, "FlutterStack");
+        FlutterStack flutterStack = new FlutterStack(this, "FlutterStack",cdkPipelineStack);
         
     }
 }

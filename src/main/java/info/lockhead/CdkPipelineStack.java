@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.jetbrains.annotations.NotNull;
-
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.pipelines.AddStageOpts;
@@ -19,9 +17,6 @@ import software.amazon.awscdk.services.codebuild.BuildEnvironment;
 import software.amazon.awscdk.services.codebuild.BuildSpec;
 import software.amazon.awscdk.services.codebuild.LinuxBuildImage;
 import software.amazon.awscdk.services.codepipeline.Pipeline;
-import software.amazon.awscdk.services.codestarnotifications.CfnNotificationRule;
-import software.amazon.awscdk.services.codestarnotifications.CfnNotificationRule.TargetProperty;
-import software.amazon.awscdk.services.codestarnotifications.INotificationRuleTarget;
 import software.amazon.awscdk.services.events.targets.SnsTopic;
 import software.amazon.awscdk.services.iam.Effect;
 import software.amazon.awscdk.services.iam.PolicyStatement;
@@ -31,6 +26,8 @@ import software.amazon.awscdk.services.sns.subscriptions.EmailSubscription;
 import software.constructs.Construct;
 
 public class CdkPipelineStack extends Stack {
+	private SnsTopic snsTopic;
+
 	public CdkPipelineStack(final Construct parent, final String id, final String branch) {
 		this(parent, id, branch, null);
 	}
@@ -51,9 +48,9 @@ public class CdkPipelineStack extends Stack {
 						.build())
 				.build();
 
-		pipeline.addStage(new CheckAgeLambdaStage(this, "DeployCheckAgeLambda"), getCheckAgeStageOpts());
-		pipeline.addStage(new PaperSizeStage(this, "DeployPaperSizeStage"), getPaperSizeStageOpts());
-		pipeline.addStage(new CalculatorStage(this, "DeployCalculatorStage"), getCalculatorStageOpts());
+//		pipeline.addStage(new CheckAgeLambdaStage(this, "DeployCheckAgeLambda"), getCheckAgeStageOpts());
+//		pipeline.addStage(new PaperSizeStage(this, "DeployPaperSizeStage"), getPaperSizeStageOpts());
+//		pipeline.addStage(new CalculatorStage(this, "DeployCalculatorStage"), getCalculatorStageOpts());
 
 		PolicyStatement flutterDeployPermission = getDeployPermissions();
 		Map<String, Object> android = new TreeMap<String, Object>();
@@ -66,7 +63,7 @@ public class CdkPipelineStack extends Stack {
 		Map<String, Object> buildSpec = new TreeMap<String, Object>();
 		buildSpec.put("phases", installSpec);
 		CodeBuildStep buildAndDeployManual = CodeBuildStep.Builder.create("Execute Flutter Build and CodeCov")
-				.buildEnvironment(BuildEnvironment.builder().buildImage(LinuxBuildImage.AMAZON_LINUX_2_3).build())
+				.buildEnvironment(BuildEnvironment.builder().buildImage(LinuxBuildImage.fromDockerRegistry("mingc/android-build-box:latest")).build())
 				.partialBuildSpec(BuildSpec.fromObject(buildSpec)).installCommands(getFlutterInstallCommands())
 				.commands(getFlutterBuildShellSteps()).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
 				.build();
@@ -74,10 +71,10 @@ public class CdkPipelineStack extends Stack {
 				.commands(List.of("pwd", "ls -al")).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
 				.build();
 
-		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
+		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage", this),
 				getFlutterStageOptions(buildAndDeployManual, startiOsBuild));
 
-		SnsTopic snsTopic = SnsTopic.Builder.create(Topic.Builder.create(this, "pipelineNotificationTopic-flutterbuild")
+		snsTopic = SnsTopic.Builder.create(Topic.Builder.create(this, "pipelineNotificationTopic-flutterbuild")
 				.topicName("DeliveryPipelineTopic-flutterbuild").build()).build();
 		snsTopic.getTopic().addToResourcePolicy(PolicyStatement.Builder.create().sid("AllowCodestarNotifications")
 				.effect(Effect.ALLOW).actions(Arrays.asList("SNS:Publish")).resources(Arrays.asList("*"))
@@ -113,7 +110,7 @@ public class CdkPipelineStack extends Stack {
 	}
 
 	private List<String> getFlutterBuildShellSteps() {
-		return List.of("sudo yum install java-11-amazon-corretto-headless", "sudo alternatives --config java", "cd ui",
+		return List.of("sudo yum install java-11-amazon-corretto", "sudo alternatives --config java", "cd ui",
 				"flutter test", "flutter build web --verbose", "flutter build apk --no-shrink",
 				"bash ../start_codecov.sh", "aws s3 sync build/web s3://cdk-codepipeline-flutter",
 				"aws s3 sync build/app s3://cdk-codepipeline-flutter-apk");
@@ -154,5 +151,9 @@ public class CdkPipelineStack extends Stack {
 			string = string.substring(0, 50);
 		}
 		return string;
+	}
+	
+	public SnsTopic getSnsTopic() {
+		return snsTopic;
 	}
 }
