@@ -10,7 +10,6 @@
   "devDependencies": {
     "@types/jest": "^26.0.10",
     "@types/node": "10.17.27",
-    "axios": "^0.27.2",
     "esbuild": "^0.14.38",
     "jest": "^26.4.2",
     "ts-jest": "^26.2.0",
