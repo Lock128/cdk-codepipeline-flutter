@@ -1,29 +1,23 @@
+import { SSM } from "aws-sdk";
 
 export const handler = async (event) => {
   try {
-    const Country = event?.queryStringParameters?.Country;
     const res = {
       statusCode: 200,
-      body: `Not found country: ${Country}`
+      body: `Finished processing but no build was started.`
     };
 
-    if (!verifyAllowedCountry(Country)) {
-      console.log(`Allowed country not found: ${Country}`);
-      res.body = "Unknown";
-    }
+//start build calling POST request
+//https://api.codemagic.io/builds
+//post details - {"appId": "62a278dc0a17acfc470d062d","workflowId": "62a278dc0a17acfc470d062c","branch": "main"}
+//should be parameters (!)
 
-    if (Country == "Germany") {
-      res.body = "A4";
-    }
-    else if (Country == "USA") {
-      res.body = "Letter";
-    }
-    else if (Country == "Argentina") {
-      res.body = "A4";
-    } else {
-      console.log(`Not found country: ${Country}`);
-      console.log(`Event: ${event}`);
-    }
+// needs header x-auth-token
+getParameterWorker("/tool/CodeMagic", true).then((value) => {
+console.log("Found password for CodeMagic: "+value)	
+});
+
+
 
     return res;
   } catch (err) {
@@ -36,7 +30,19 @@ export const handler = async (event) => {
   }
 };
 
-let verifyAllowedCountry = function (Country: string): boolean {
-  let listAllowedCountries: Array<string> = ["Germany", "India", "USA", "Mexico", "Argentina"];
-  return listAllowedCountries.includes(Country);
-};
+const getParameterWorker = async (name:string, decrypt:boolean) : Promise<string> => {
+    const ssm = new SSM();
+    const result = await ssm
+    .getParameter({ Name: name, WithDecryption: decrypt })
+    .promise();
+    return result.Parameter.Value;
+}
+
+export const getParameter = async (name:string) : Promise<string> => {
+    return getParameterWorker(name,false);
+}
+
+export const getEncryptedParameter = async (name:string) : Promise<string> => {
+    return getParameterWorker(name,true);
+}
+
