@@ -1,0 +1,22 @@
+{
+  "name": "axios-layer",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "jest --config=jest.config.js"
+  },
+  "devDependencies": {
+    "@types/jest": "^26.0.10",
+    "@types/node": "10.17.27",
+    "axios": "^0.27.2",
+    "esbuild": "^0.14.38",
+    "jest": "^26.4.2",
+    "ts-jest": "^26.2.0",
+    "ts-node": "^9.0.0",
+    "typescript": "~3.9.7"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1152.0",
+    "source-map-support": "^0.5.16",
+    "axios": "^0.27.2",
+  }
+}

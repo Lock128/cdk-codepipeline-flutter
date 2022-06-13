@@ -41,12 +41,12 @@ public class FlutterStack extends Stack {
 				.publicReadAccess(false).versioned(false).lifecycleRules(Arrays.asList(rule)).build();
 		apkBucket = new Bucket(this, "cdk-codepipeline-flutter-apk", appApkBucketProps);
 
-//		NodejsFunction iOsBuild = NodejsFunction.Builder.create(this, "TriggerIOSBuildHandler")
-//				.entry("ios-build/lib/ios-build.ts").handler("handler").memorySize(128).runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_16_X)
-//				.depsLockFilePath("ios-build/package-lock.json").bundling(BundlingOptions.builder().externalModules(List.of("aws-sdk", "axios")).build()).build();
 		NodejsFunction iOsBuild = NodejsFunction.Builder.create(this, "TriggerIOSBuildHandler")
 				.entry("ios-build/lib/ios-build.ts").handler("handler").memorySize(128).runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_16_X)
-				.depsLockFilePath("ios-build/package-lock.json").build();
+				.depsLockFilePath("ios-build/package-lock.json").bundling(BundlingOptions.builder().externalModules(List.of("aws-sdk", "axios")).build()).build();
+//		NodejsFunction iOsBuild = NodejsFunction.Builder.create(this, "TriggerIOSBuildHandler")
+//				.entry("ios-build/lib/ios-build.ts").handler("handler").memorySize(128).runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_16_X)
+//				.depsLockFilePath("ios-build/package-lock.json").build();
 
 		PolicyStatement stsAccess = PolicyStatement.Builder.create().effect(Effect.ALLOW).resources(Arrays.asList("*"))
 				.actions(Arrays.asList("ssm:DescribeParameters", "ssm:GetParameters", "ssm:GetParameter",
