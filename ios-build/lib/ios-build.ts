@@ -52,7 +52,7 @@ export const handler = async (event) => {
 			};
 			const response = await axios.post("https://api.codemagic.io/builds", data, options);
 
-			if (response.status!=200) {
+			if (response.status != 200) {
 				throw new Error(`Error! status: ${response.statusText}`);
 			}
 
