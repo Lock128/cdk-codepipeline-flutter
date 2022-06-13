@@ -13,9 +13,9 @@ export const handler = async (event) => {
 //should be parameters (!)
 
 // needs header x-auth-token
-getParameterWorker("/tool/CodeMagic", true).then((value) => {
-console.log("Found password for CodeMagic: "+value)	
-});
+await getParameterWorker("/tool/CodeMagic", true).then((value) => {
+      console.log("Found password for CodeMagic: " + value);
+    });
 
 
 
