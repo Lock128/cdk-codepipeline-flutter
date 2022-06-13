@@ -63,7 +63,7 @@ public class CdkPipelineStack extends Stack {
 		Map<String, Object> buildSpec = new TreeMap<String, Object>();
 		buildSpec.put("phases", installSpec);
 		CodeBuildStep buildAndDeployManual = CodeBuildStep.Builder.create("Execute Flutter Build and CodeCov")
-				.buildEnvironment(BuildEnvironment.builder().buildImage(LinuxBuildImage.fromDockerRegistry("mingc/android-build-box:latest")).build())
+				.buildEnvironment(BuildEnvironment.builder().buildImage(LinuxBuildImage.fromDockerRegistry("instrumentisto/flutter:3")).build())
 				.partialBuildSpec(BuildSpec.fromObject(buildSpec)).installCommands(getFlutterInstallCommands())
 				.commands(getFlutterBuildShellSteps()).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
 				.build();
