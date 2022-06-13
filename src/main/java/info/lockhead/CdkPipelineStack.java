@@ -63,7 +63,8 @@ public class CdkPipelineStack extends Stack {
 		Map<String, Object> buildSpec = new TreeMap<String, Object>();
 		buildSpec.put("phases", installSpec);
 		CodeBuildStep buildAndDeployManual = CodeBuildStep.Builder.create("Execute Flutter Build and CodeCov")
-				.buildEnvironment(BuildEnvironment.builder().buildImage(LinuxBuildImage.fromDockerRegistry("instrumentisto/flutter:3")).build())
+				.buildEnvironment(BuildEnvironment.builder()
+						.buildImage(LinuxBuildImage.fromDockerRegistry("instrumentisto/flutter:3")).build())
 				.partialBuildSpec(BuildSpec.fromObject(buildSpec)).installCommands(getFlutterInstallCommands())
 				.commands(getFlutterBuildShellSteps()).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
 				.build();
@@ -98,7 +99,8 @@ public class CdkPipelineStack extends Stack {
 	}
 
 	private List<String> getFlutterInstallCommands() {
-		return List.of("sudo apt-get install awscli", "flutter precache", "flutter doctor", "flutter devices");
+		return List.of("curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
+				"unzip awscliv2.zip", "sudo ./aws/install", "flutter precache", "flutter doctor", "flutter devices");
 	}
 
 	private PolicyStatement getDeployPermissions() {
@@ -109,8 +111,7 @@ public class CdkPipelineStack extends Stack {
 	}
 
 	private List<String> getFlutterBuildShellSteps() {
-		return List.of("cd ui",
-				"flutter test", "flutter build web --verbose", "flutter build apk --no-shrink",
+		return List.of("cd ui", "flutter test", "flutter build web --verbose", "flutter build apk --no-shrink",
 				"bash ../start_codecov.sh", "aws s3 sync build/web s3://cdk-codepipeline-flutter",
 				"aws s3 sync build/app s3://cdk-codepipeline-flutter-apk");
 	}
@@ -151,7 +152,7 @@ public class CdkPipelineStack extends Stack {
 		}
 		return string;
 	}
-	
+
 	public SnsTopic getSnsTopic() {
 		return snsTopic;
 	}
