@@ -18,6 +18,8 @@
     "typescript": "~3.9.7"
   },
   "dependencies": {
-    "source-map-support": "^0.5.16"
+    "source-map-support": "^0.5.16",
+    "aws-sdk": "^3.108.1",
+    "node-fetch": "^3.2.6"
   }
 }
