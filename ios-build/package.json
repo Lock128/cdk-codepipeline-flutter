@@ -14,11 +14,12 @@
     "jest": "^26.4.2",
     "ts-jest": "^26.2.0",
     "ts-node": "^9.0.0",
-    "typescript": "~3.9.7"
+    "typescript": "~3.9.7",
+    "node-fetch": "^3.2.6"
   },
   "dependencies": {
-    "source-map-support": "^0.5.16",
     "aws-sdk": "^2.1152.0",
-    "node-fetch": "^3.2.6"
+    "node-fetch": "^3.2.6",
+    "source-map-support": "^0.5.16"
   }
 }
