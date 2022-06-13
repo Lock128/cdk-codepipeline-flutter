@@ -6,7 +6,6 @@
     "destroy": "cdk destroy",
     "start": "./start.sh",
     "test": "jest --config=jest.config.js"
-
   },
   "devDependencies": {
     "@types/jest": "^26.0.10",
