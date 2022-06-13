@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import info.lockhead.CdkPipelineStack;
 import software.amazon.awscdk.Duration;
+import software.amazon.awscdk.Fn;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.services.codepipeline.IPipeline;
 import software.amazon.awscdk.services.codepipeline.Pipeline;
@@ -56,14 +57,9 @@ public class FlutterStack extends Stack {
 				.build();
 		iOsBuild.addToRolePolicy(stsAccess);
 
-		if (cdkPipelineStack != null && cdkPipelineStack.getSnsTopic() != null) {
-			iOsBuild.addEventSource(SnsEventSource.Builder.create((ITopic) cdkPipelineStack.getSnsTopic()).build());
-		} else {
-			System.err.println("Error adding EventSource - cdkPipelineStack=" + cdkPipelineStack);
-			IPipeline fromPipelineArn = Pipeline.fromPipelineArn(this, "pipelineFromArn", "arn:aws:codepipeline:eu-central-1:916032256060:CDKCodepipelineFlutterStackmain");
-			ITopic fromTopicArn = Topic.fromTopicArn(this, "fromTopicArn","arn:aws:sns:eu-central-1:916032256060:DeliveryPipelineTopic-flutterbuild");
-			iOsBuild.addEventSource(SnsEventSource.Builder.create(fromTopicArn).build());
-		}
+//		ITopic fromTopicArn = Topic.fromTopicArn(this, "fromTopicArn","arn:aws:sns:eu-central-1:916032256060:DeliveryPipelineTopic-flutterbuild");
+		ITopic fromTopicArn = Topic.fromTopicArn(this, "fromTopicArn",Fn.importValue("FlutterCDKSNSTarget"));
+		iOsBuild.addEventSource(SnsEventSource.Builder.create(fromTopicArn).build());
 
 	}
 

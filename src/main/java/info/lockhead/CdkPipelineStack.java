@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.pipelines.AddStageOpts;
@@ -83,6 +84,11 @@ public class CdkPipelineStack extends Stack {
 
 		snsTopic.getTopic().addSubscription(EmailSubscription.Builder.create("lockhead@lockhead.net").build());
 
+		CfnOutput.Builder create = CfnOutput.Builder.create(this,
+				"CognitoIdpUserTableName");
+		create.exportName("FlutterCDKSNSTarget");
+		create.value(snsTopic.getTopic().getTopicArn());
+		
 		try {
 			Pipeline detailedPipeline = pipeline.getPipeline();
 			detailedPipeline.notifyOnAnyStageStateChange(id,
