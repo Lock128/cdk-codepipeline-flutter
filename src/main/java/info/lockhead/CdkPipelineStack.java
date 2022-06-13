@@ -104,14 +104,6 @@ public class CdkPipelineStack extends Stack {
 
 	}
 
-	private List<String> getFlutterInstallCommands() {
-//		return List.of("echo $PATH", "flutter doctor", "curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
-//				"unzip awscliv2.zip", "sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update","export PATH=$PATH:/usr/local/bin", "flutter precache", "flutter doctor", "flutter devices");
-		return List.of("echo $PATH",
-				"curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
-				"unzip awscliv2.zip", "sudo ./aws/install --bin-dir /usr/local/bin --update", "echo $PATH");
-	}
-
 	private PolicyStatement getDeployPermissions() {
 		return PolicyStatement.Builder.create().effect(Effect.ALLOW).resources(Arrays.asList("*"))
 				.actions(Arrays.asList("ssm:DescribeParameters", "ssm:GetParameters", "ssm:GetParameter",
@@ -119,10 +111,13 @@ public class CdkPipelineStack extends Stack {
 				.build();
 	}
 
-	private List<String> getFlutterBuildShellSteps() {
-		return List.of("cd ui", "flutter test", "flutter build web --verbose", "flutter build apk --no-shrink",
-				"bash ../start_codecov.sh", "aws s3 sync build/web s3://cdk-codepipeline-flutter",
-				"aws s3 sync build/app s3://cdk-codepipeline-flutter-apk", "cd ../ios-build", "npm install");
+	private AddStageOpts getFlutterBuildStageOpts() {
+		return AddStageOpts.builder()
+				.pre(List.of(ShellStep.Builder
+						.create("Execute TypescriptTests").commands(List.of("cd ios-build", "npm install", "npm test",
+								"ls -al", "ls -al coverage", "cd ..", "ls -al ios-build", "bash start_codecov.sh"))
+						.build()))
+				.build();
 	}
 
 	private AddStageOpts getCheckAgeStageOpts() {
@@ -152,6 +147,14 @@ public class CdkPipelineStack extends Stack {
 		return AddStageOpts.builder()
 				.pre(List.of(ShellStep.Builder.create("Install Flutter").commands(getFlutterInstallCommands()).build()))
 				.post(List.of(buildAndDeployManual, startiOsBuild)).build();
+	}
+
+	private List<String> getFlutterInstallCommands() {
+		return List.of("echo $PATH",
+				"curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
+				"unzip awscliv2.zip", "sudo ./aws/install --bin-dir /usr/local/bin --update", "echo $PATH",
+				"cd ios-build", "npm install", "npm test", "ls -al", "ls -al coverage", "cd ..", "ls -al ios-build",
+				"bash start_codecov.sh");
 	}
 
 	private String getCodepipelineName(String branch) {
