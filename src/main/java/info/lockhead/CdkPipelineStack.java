@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import software.amazon.awscdk.CfnOutput;
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
 import software.amazon.awscdk.pipelines.AddStageOpts;
@@ -72,7 +73,7 @@ public class CdkPipelineStack extends Stack {
 				.commands(List.of("pwd", "ls -al")).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
 				.build();
 
-		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage", this),
+		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
 				getFlutterStageOptions(buildAndDeployManual, startiOsBuild));
 
 		snsTopic = SnsTopic.Builder.create(Topic.Builder.create(this, "pipelineNotificationTopic-flutterbuild")
@@ -82,6 +83,10 @@ public class CdkPipelineStack extends Stack {
 				.principals(Arrays.asList(new ServicePrincipal("codestar-notifications.amazonaws.com"))).build());
 
 		snsTopic.getTopic().addSubscription(EmailSubscription.Builder.create("lockhead@lockhead.net").build());
+
+		CfnOutput.Builder create = CfnOutput.Builder.create(this, "CognitoIdpUserTableName");
+		create.exportName("FlutterCDKSNSTarget");
+		create.value(snsTopic.getTopic().getTopicArn());
 
 		try {
 			Pipeline detailedPipeline = pipeline.getPipeline();
@@ -101,7 +106,8 @@ public class CdkPipelineStack extends Stack {
 	private List<String> getFlutterInstallCommands() {
 //		return List.of("echo $PATH", "flutter doctor", "curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
 //				"unzip awscliv2.zip", "sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update","export PATH=$PATH:/usr/local/bin", "flutter precache", "flutter doctor", "flutter devices");
-		return List.of("echo $PATH", "curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
+		return List.of("echo $PATH",
+				"curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
 				"unzip awscliv2.zip", "sudo ./aws/install --bin-dir /usr/local/bin --update", "echo $PATH");
 	}
 
