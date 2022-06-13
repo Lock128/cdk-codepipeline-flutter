@@ -1,6 +1,7 @@
 package info.lockhead.infrastructure;
 
 import java.util.Arrays;
+import java.util.List;
 
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Fn;
@@ -8,6 +9,7 @@ import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.services.iam.Effect;
 import software.amazon.awscdk.services.iam.PolicyStatement;
 import software.amazon.awscdk.services.lambda.eventsources.SnsEventSource;
+import software.amazon.awscdk.services.lambda.nodejs.BundlingOptions;
 import software.amazon.awscdk.services.lambda.nodejs.NodejsFunction;
 import software.amazon.awscdk.services.s3.BlockPublicAccess;
 import software.amazon.awscdk.services.s3.Bucket;
@@ -41,7 +43,7 @@ public class FlutterStack extends Stack {
 
 		NodejsFunction iOsBuild = NodejsFunction.Builder.create(this, "TriggerIOSBuildHandler")
 				.entry("ios-build/lib/ios-build.ts").handler("handler").memorySize(128).runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_16_X)
-				.depsLockFilePath("ios-build/package-lock.json").build();
+				.depsLockFilePath("ios-build/package-lock.json").bundling(BundlingOptions.builder().externalModules(List.of("aws-cdk", "axios")).build()).build();
 
 		PolicyStatement stsAccess = PolicyStatement.Builder.create().effect(Effect.ALLOW).resources(Arrays.asList("*"))
 				.actions(Arrays.asList("ssm:DescribeParameters", "ssm:GetParameters", "ssm:GetParameter",
