@@ -1,5 +1,4 @@
 import { SSM } from "aws-sdk";
-import fetch from "node-fetch";
 
 type StartBuildResponse = {
 	buildId: string;
@@ -32,29 +31,33 @@ export const handler = async (event) => {
 			return value;
 		});
 
+		const axios = require('axios').default;
+
 		try {
 			//️ const response: Response
 			// {"appId": "62a278dc0a17acfc470d062d","workflowId": "62a278dc0a17acfc470d062c","branch": "main"}
-			const response = await fetch('https://api.codemagic.io/builds', {
-				method: 'POST',
-				body: JSON.stringify({
-					appId: '62a278dc0a17acfc470d062d',
-					workflowId: '62a278dc0a17acfc470d062c',
-					branch: 'main'
-				}),
+
+			const data = JSON.stringify({
+				appId: '62a278dc0a17acfc470d062d',
+				workflowId: '62a278dc0a17acfc470d062c',
+				branch: 'main'
+			});
+
+			const options = {
 				headers: {
 					'Content-Type': 'application/json',
 					Accept: 'application/json',
 					'x-auth-token': codeMagicToken
 				},
-			});
+			};
+			const response = await axios.post("https://api.codemagic.io/builds", data, options);
 
-			if (!response.ok) {
-				throw new Error(`Error! status: ${response.status}`);
+			if (response.status!=200) {
+				throw new Error(`Error! status: ${response.statusText}`);
 			}
 
 			// ️ const result: StartBuildResponse
-			const result = (await response.json()) as StartBuildResponse;
+			const result = (await response.data()) as StartBuildResponse;
 
 			console.log('result is: ', JSON.stringify(result, null, 4));
 		} catch (error) {
