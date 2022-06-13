@@ -142,11 +142,13 @@ public class CdkPipelineStack extends Stack {
 		return AddStageOpts.builder().pre(List.of(ShellStep.Builder.create("Build Calculator Lambda")
 				.commands(List.of("ls -al paper-size", "bash start_codecov.sh")).build())).build();
 	}
-	
+
 	private List<String> getFlutterBuildShellSteps() {
 		return List.of("cd ui", "flutter test", "flutter build web --verbose", "flutter build apk --no-shrink",
 				"bash ../start_codecov.sh", "aws s3 sync build/web s3://cdk-codepipeline-flutter",
-				"aws s3 sync build/app s3://cdk-codepipeline-flutter-apk", "cd ../ios-build", "npm install");
+				"aws s3 sync build/app s3://cdk-codepipeline-flutter-apk",
+				"curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -", "sudo apt-get install -y nodejs",
+				"cd ../ios-build", "npm install");
 	}
 
 	private AddStageOpts getFlutterStageOptions(CodeBuildStep buildAndDeployManual, CodeBuildStep startiOsBuild) {
