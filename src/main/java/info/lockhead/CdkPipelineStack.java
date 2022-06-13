@@ -87,6 +87,7 @@ public class CdkPipelineStack extends Stack {
 		CfnOutput.Builder create = CfnOutput.Builder.create(this, "CognitoIdpUserTableName");
 		create.exportName("FlutterCDKSNSTarget");
 		create.value(snsTopic.getTopic().getTopicArn());
+		create.build();
 
 		try {
 			Pipeline detailedPipeline = pipeline.getPipeline();
