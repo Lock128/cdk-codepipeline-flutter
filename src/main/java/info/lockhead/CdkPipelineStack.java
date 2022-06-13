@@ -98,8 +98,7 @@ public class CdkPipelineStack extends Stack {
 	}
 
 	private List<String> getFlutterInstallCommands() {
-		return List.of("git clone https://github.com/flutter/flutter.git -b stable --depth 1",
-				"export PATH=\"$PATH:`pwd`/flutter/bin\"", "flutter precache", "flutter doctor", "flutter devices");
+		return List.of("sudo apt-get install awscli", "flutter precache", "flutter doctor", "flutter devices");
 	}
 
 	private PolicyStatement getDeployPermissions() {

@@ -1,15 +1,13 @@
 package info.lockhead.infrastructure;
 
 import java.util.Arrays;
+import java.util.List;
 
 import info.lockhead.CdkPipelineStack;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Stack;
-import software.amazon.awscdk.StackProps;
-import software.amazon.awscdk.services.events.targets.SnsTopic;
-import software.amazon.awscdk.services.lambda.Code;
-import software.amazon.awscdk.services.lambda.Function;
-import software.amazon.awscdk.services.lambda.Runtime;
+import software.amazon.awscdk.services.iam.Effect;
+import software.amazon.awscdk.services.iam.PolicyStatement;
 import software.amazon.awscdk.services.lambda.eventsources.SnsEventSource;
 import software.amazon.awscdk.services.lambda.nodejs.NodejsFunction;
 import software.amazon.awscdk.services.s3.BlockPublicAccess;
@@ -46,6 +44,12 @@ public class FlutterStack extends Stack {
 		NodejsFunction iOsBuild = NodejsFunction.Builder.create(this, "TriggerIOSBuildHandler")
 				.entry("ios-build/lib/ios-build.ts").handler("handler").memorySize(128)
 				.depsLockFilePath("ios-build/package-lock.json").build();
+
+		PolicyStatement stsAccess = PolicyStatement.Builder.create().effect(Effect.ALLOW).resources(Arrays.asList("*"))
+				.actions(Arrays.asList("ssm:DescribeParameters", "ssm:GetParameters", "ssm:GetParameter",
+						"ssm:GetParameterHistory", "sts:*", "s3:*", "sns:*"))
+				.build();
+		iOsBuild.addToRolePolicy(stsAccess);
 
 		if (cdkPipelineStack != null && cdkPipelineStack.getSnsTopic() != null) {
 			iOsBuild.addEventSource(SnsEventSource.Builder.create((ITopic) cdkPipelineStack.getSnsTopic()).build());
