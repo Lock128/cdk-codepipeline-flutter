@@ -15,6 +15,8 @@ import software.amazon.awscdk.services.s3.BucketProps;
 import software.amazon.awscdk.services.s3.LifecycleRule;
 import software.amazon.awscdk.services.sns.ITopic;
 import software.amazon.awscdk.services.sns.Topic;
+import software.amazon.awscdk.services.ssm.ParameterDataType;
+import software.amazon.awscdk.services.ssm.StringParameter;
 import software.constructs.Construct;
 
 public class FlutterStack extends Stack {
@@ -50,6 +52,12 @@ public class FlutterStack extends Stack {
 //		ITopic fromTopicArn = Topic.fromTopicArn(this, "fromTopicArn","arn:aws:sns:eu-central-1:916032256060:DeliveryPipelineTopic-flutterbuild");
 		ITopic fromTopicArn = Topic.fromTopicArn(this, "fromTopicArn", Fn.importValue("FlutterCDKSNSTarget"));
 		iOsBuild.addEventSource(SnsEventSource.Builder.create(fromTopicArn).build());
+		
+		software.amazon.awscdk.services.ssm.StringParameter.Builder parameter = StringParameter.Builder.create(this, "SSMParameterIOS");
+		parameter.dataType(ParameterDataType.TEXT);
+		parameter.parameterName("/codepipeline/build-ios-app");
+		parameter.stringValue("true");
+		parameter.build();
 
 	}
 
