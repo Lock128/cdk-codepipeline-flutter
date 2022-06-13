@@ -1,10 +1,11 @@
 import { SSM } from "aws-sdk";
+import axios from "axios"
 
 type StartBuildResponse = {
 	buildId: string;
 };
 
-const axios = require('axios').default;
+//const axios = require('axios').default;
 
 export const handler = async (event) => {
 	try {
