@@ -4,6 +4,7 @@ type StartBuildResponse = {
 	buildId: string;
 };
 
+const axios = require('axios').default;
 
 export const handler = async (event) => {
 	try {
@@ -31,7 +32,7 @@ export const handler = async (event) => {
 			return value;
 		});
 
-		const axios = require('axios').default;
+
 
 		try {
 			//️ const response: Response
