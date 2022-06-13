@@ -42,7 +42,7 @@ public class CdkPipelineStack extends Stack {
 				.synth(CodeBuildStep.Builder.create("SynthStep")
 						.input(CodePipelineSource.connection("Lock128/cdk-codepipeline-flutter", branch,
 								ConnectionSourceOptions.builder().connectionArn(connectionArn).build()))
-						.installCommands(List.of("npm install -g aws-cdk", "cd ios-build", "npm install" // Commands to run before build
+						.installCommands(List.of("npm install -g aws-cdk", "cd ios-build", "npm install", "cd .." // Commands to run before build
 						)).commands(List.of("mvn test", "mvn package", // Language-specific build commands
 								"npx cdk synth", // Synth command (always same)
 								"bash start_codecov.sh"))
