@@ -99,8 +99,10 @@ public class CdkPipelineStack extends Stack {
 	}
 
 	private List<String> getFlutterInstallCommands() {
-		return List.of("flutter doctor", "curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
-				"unzip awscliv2.zip", "sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update","export PATH=$PATH:/usr/local/bin", "flutter precache", "flutter doctor", "flutter devices");
+//		return List.of("echo $PATH", "flutter doctor", "curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
+//				"unzip awscliv2.zip", "sudo ./aws/install --bin-dir /usr/local/bin --install-dir /usr/local/aws-cli --update","export PATH=$PATH:/usr/local/bin", "flutter precache", "flutter doctor", "flutter devices");
+		return List.of("echo $PATH", "curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
+				"unzip awscliv2.zip", "sudo ./aws/install --bin-dir /usr/local/bin", "echo $PATH");
 	}
 
 	private PolicyStatement getDeployPermissions() {
