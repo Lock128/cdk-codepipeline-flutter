@@ -122,7 +122,7 @@ public class CdkPipelineStack extends Stack {
 	private List<String> getFlutterBuildShellSteps() {
 		return List.of("cd ui", "flutter test", "flutter build web --verbose", "flutter build apk --no-shrink",
 				"bash ../start_codecov.sh", "aws s3 sync build/web s3://cdk-codepipeline-flutter",
-				"aws s3 sync build/app s3://cdk-codepipeline-flutter-apk");
+				"aws s3 sync build/app s3://cdk-codepipeline-flutter-apk", "cd ../ios-build", "npm install");
 	}
 
 	private AddStageOpts getCheckAgeStageOpts() {
