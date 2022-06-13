@@ -161,6 +161,7 @@ public class CdkPipelineStack extends Stack {
 		return List.of("echo $PATH",
 				"curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
 				"unzip awscliv2.zip", "sudo ./aws/install --bin-dir /usr/local/bin --update", "echo $PATH",
+				"curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -", "sudo apt-get install -y nodejs",
 				"cd ios-build", "npm install", "npm test", "ls -al", "ls -al coverage", "cd ..", "ls -al ios-build",
 				"bash start_codecov.sh");
 	}
