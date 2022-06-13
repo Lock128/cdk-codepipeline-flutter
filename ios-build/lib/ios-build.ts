@@ -1,4 +1,5 @@
 import { SSM } from "aws-sdk";
+import fetch from "node-fetch";
 
 type StartBuildResponse = {
 	buildId: string;
