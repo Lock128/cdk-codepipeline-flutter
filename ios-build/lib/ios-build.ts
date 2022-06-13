@@ -59,7 +59,7 @@ export const handler = async (event) => {
 			}
 
 			// ️ const result: StartBuildResponse
-			const result = (await response.data()) as StartBuildResponse;
+			const result = (await response.data) as StartBuildResponse;
 
 			console.log('result is: ', JSON.stringify(result, null, 4));
 		} catch (error) {
