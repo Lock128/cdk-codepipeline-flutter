@@ -1,16 +1,10 @@
 package info.lockhead.infrastructure;
 
 import java.util.Arrays;
-import java.util.List;
 
-import org.jetbrains.annotations.NotNull;
-
-import info.lockhead.CdkPipelineStack;
 import software.amazon.awscdk.Duration;
 import software.amazon.awscdk.Fn;
 import software.amazon.awscdk.Stack;
-import software.amazon.awscdk.services.codepipeline.IPipeline;
-import software.amazon.awscdk.services.codepipeline.Pipeline;
 import software.amazon.awscdk.services.iam.Effect;
 import software.amazon.awscdk.services.iam.PolicyStatement;
 import software.amazon.awscdk.services.lambda.eventsources.SnsEventSource;
@@ -28,10 +22,6 @@ public class FlutterStack extends Stack {
 	private Bucket apkBucket;
 
 	public FlutterStack(final Construct parent, final String id) {
-		this(parent, id, null);
-	}
-
-	public FlutterStack(final Construct parent, final String id, final CdkPipelineStack cdkPipelineStack) {
 		super(parent, id);
 		LifecycleRule rule = LifecycleRule.builder().enabled(true).expiration(Duration.days(10)).build();
 		BucketProps appBucketProps = BucketProps.builder().bucketName("cdk-codepipeline-flutter")
@@ -58,7 +48,7 @@ public class FlutterStack extends Stack {
 		iOsBuild.addToRolePolicy(stsAccess);
 
 //		ITopic fromTopicArn = Topic.fromTopicArn(this, "fromTopicArn","arn:aws:sns:eu-central-1:916032256060:DeliveryPipelineTopic-flutterbuild");
-		ITopic fromTopicArn = Topic.fromTopicArn(this, "fromTopicArn",Fn.importValue("FlutterCDKSNSTarget"));
+		ITopic fromTopicArn = Topic.fromTopicArn(this, "fromTopicArn", Fn.importValue("FlutterCDKSNSTarget"));
 		iOsBuild.addEventSource(SnsEventSource.Builder.create(fromTopicArn).build());
 
 	}
