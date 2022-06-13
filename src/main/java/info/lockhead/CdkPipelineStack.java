@@ -49,9 +49,9 @@ public class CdkPipelineStack extends Stack {
 						.build())
 				.build();
 
-//		pipeline.addStage(new CheckAgeLambdaStage(this, "DeployCheckAgeLambda"), getCheckAgeStageOpts());
-//		pipeline.addStage(new PaperSizeStage(this, "DeployPaperSizeStage"), getPaperSizeStageOpts());
-//		pipeline.addStage(new CalculatorStage(this, "DeployCalculatorStage"), getCalculatorStageOpts());
+		pipeline.addStage(new CheckAgeLambdaStage(this, "DeployCheckAgeLambda"), getCheckAgeStageOpts());
+		pipeline.addStage(new PaperSizeStage(this, "DeployPaperSizeStage"), getPaperSizeStageOpts());
+		pipeline.addStage(new CalculatorStage(this, "DeployCalculatorStage"), getCalculatorStageOpts());
 
 		PolicyStatement flutterDeployPermission = getDeployPermissions();
 		Map<String, Object> android = new TreeMap<String, Object>();
