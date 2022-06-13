@@ -6,7 +6,6 @@
     "destroy": "cdk destroy",
     "start": "./start.sh",
     "test": "jest --config=jest.config.js"
-
   },
   "devDependencies": {
     "@types/jest": "^26.0.10",
@@ -19,7 +18,7 @@
   },
   "dependencies": {
     "source-map-support": "^0.5.16",
-    "aws-sdk": "^3.108.1",
+    "aws-sdk": "^2.1152.0",
     "node-fetch": "^3.2.6"
   }
 }
