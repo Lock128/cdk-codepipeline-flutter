@@ -12,7 +12,7 @@ class FlutterStackTest {
 	void testOneBucket() {
 		App app = new App();
 
-		FlutterStack uxStack = new FlutterStack(app, "pb-hw-test-stack");
+		FlutterStack uxStack = new FlutterStack(app, "flutter-test-stack");
 
 		Template template = Template.fromStack(uxStack);
 		template.resourceCountIs("AWS::S3::Bucket", 2);

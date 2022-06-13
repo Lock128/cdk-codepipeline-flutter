@@ -12,7 +12,7 @@ class PaperSizeStackTest {
 	void testOneBucket() {
 		App app = new App();
 
-		PaperSizeStack uxStack = new PaperSizeStack(app, "pb-hw-test-stack");
+		PaperSizeStack uxStack = new PaperSizeStack(app, "papersize-test-stack");
 
 		Template template = Template.fromStack(uxStack);
 		template.resourceCountIs("AWS::Lambda::Function", 1);
