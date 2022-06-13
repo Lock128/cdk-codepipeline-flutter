@@ -43,7 +43,7 @@ public class FlutterStack extends Stack {
 
 		NodejsFunction iOsBuild = NodejsFunction.Builder.create(this, "TriggerIOSBuildHandler")
 				.entry("ios-build/lib/ios-build.ts").handler("handler").memorySize(128).runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_16_X)
-				.depsLockFilePath("ios-build/package-lock.json").bundling(BundlingOptions.builder().externalModules(List.of("aws-cdk", "axios")).build()).build();
+				.depsLockFilePath("ios-build/package-lock.json").bundling(BundlingOptions.builder().externalModules(List.of("aws-sdk", "axios")).build()).build();
 
 		PolicyStatement stsAccess = PolicyStatement.Builder.create().effect(Effect.ALLOW).resources(Arrays.asList("*"))
 				.actions(Arrays.asList("ssm:DescribeParameters", "ssm:GetParameters", "ssm:GetParameter",
