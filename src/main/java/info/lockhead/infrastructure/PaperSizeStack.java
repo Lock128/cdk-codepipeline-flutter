@@ -35,12 +35,6 @@ public class PaperSizeStack extends Stack {
 		NodejsFunction paperSize = NodejsFunction.Builder.create(this, "PaperSizeHandler").entry("paper-size/lib/paper-size.ts")
 				.handler("handler").memorySize(128).depsLockFilePath("paper-size/package-lock.json").build();
 
-//		final Function paperSize = Function.Builder.create(this, "PaperSizeHandler")
-//				.runtime(software.amazon.awscdk.services.lambda.Runtime.NODEJS_16_X) // execution environment
-//				.code(Code.fromAsset("lambda-typescript-2/lib")) // code loaded from the "lambda" directory
-//				.memorySize(64).handler("papersize.handler") // file is "hello", function is "handler"
-//				.build();
-
 		functionUrl = paperSize.addFunctionUrl(FunctionUrlOptions.builder().authType(FunctionUrlAuthType.NONE)
 				.cors(FunctionUrlCorsOptions.builder().allowedHeaders(Arrays.asList("*"))
 						.allowedMethods(Arrays.asList(HttpMethod.ALL)).allowedOrigins(Arrays.asList("*")).build())

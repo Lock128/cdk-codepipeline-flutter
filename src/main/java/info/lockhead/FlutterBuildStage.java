@@ -9,7 +9,7 @@ public class FlutterBuildStage extends Stage {
 	public FlutterBuildStage(final Construct scope, final String id) {
 		super(scope, id);
 
-		FlutterStack flutterStack = new FlutterStack(this, "FlutterStack");
+		new FlutterStack(this, "FlutterStack");
 
 	}
 }
