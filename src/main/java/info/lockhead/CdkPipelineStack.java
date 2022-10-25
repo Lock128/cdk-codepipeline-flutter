@@ -36,24 +36,70 @@ public class CdkPipelineStack extends Stack {
 	public CdkPipelineStack(final Construct parent, final String id, final String branch, final StackProps props) {
 		super(parent, id, props);
 
+		// FIXME needs to go into parameter store
 		String connectionArn = "arn:aws:codestar-connections:eu-central-1:916032256060:connection/12b42dad-052d-4e38-ad41-f96eccb43132";
 		final CodePipeline pipeline = CodePipeline.Builder.create(this, getCodepipelineName(branch))
 				.pipelineName(getCodepipelineName(branch)).dockerEnabledForSynth(true)
-				.synth(CodeBuildStep.Builder.create("SynthStep")
-						.input(CodePipelineSource.connection("Lock128/cdk-codepipeline-flutter", branch,
-								ConnectionSourceOptions.builder().connectionArn(connectionArn).build()))
-						.installCommands(List.of("npm install -g aws-cdk", "cd ios-build", "npm install", "cd .." // Commands to run before build
-						)).commands(List.of("mvn test", "mvn package", // Language-specific build commands
-								"npx cdk synth", // Synth command (always same)
-								"bash start_codecov.sh"))
-						.build())
-				.build();
+				.synth(getSpecialSynthStep(branch, connectionArn)).build();
 
 		pipeline.addStage(new CheckAgeLambdaStage(this, "DeployCheckAgeLambda"), getCheckAgeStageOpts());
 		pipeline.addStage(new PaperSizeStage(this, "DeployPaperSizeStage"), getPaperSizeStageOpts());
 		pipeline.addStage(new CalculatorStage(this, "DeployCalculatorStage"), getCalculatorStageOpts());
 
 		PolicyStatement flutterDeployPermission = getDeployPermissions();
+		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"), flutterOptions(flutterDeployPermission));
+
+		snsTopic = SnsTopic.Builder.create(Topic.Builder.create(this, "pipelineNotificationTopic-flutterbuild")
+				.topicName("DeliveryPipelineTopic-flutterbuild").build()).build();
+		snsTopic.getTopic().addToResourcePolicy(PolicyStatement.Builder.create().sid("AllowCodestarNotifications")
+				.effect(Effect.ALLOW).actions(Arrays.asList("SNS:Publish")).resources(Arrays.asList("*"))
+				.principals(Arrays.asList(new ServicePrincipal("codestar-notifications.amazonaws.com"))).build());
+
+		snsTopic.getTopic().addSubscription(EmailSubscription.Builder.create("lockhead@lockhead.net").build());
+
+		CfnOutput.Builder create = CfnOutput.Builder.create(this, "FlutterCDKSNSTarget");
+		create.exportName("FlutterCDKSNSTarget");
+		create.value(snsTopic.getTopic().getTopicArn());
+		create.build();
+
+		adddPipelineStateChangeNotifaction(id, pipeline);
+
+	}
+
+	private CodeBuildStep getSpecialSynthStep(final String branch, String connectionArn) {
+		return CodeBuildStep.Builder.create("SynthStep")
+				.input(CodePipelineSource.connection("Lock128/cdk-codepipeline-flutter", branch,
+						ConnectionSourceOptions.builder().connectionArn(connectionArn).build()))
+				.installCommands(List.of("npm install -g aws-cdk", "cd ios-build", "npm install", "cd .."))
+				.commands(List.of("mvn test", "mvn package", // Language-specific build commands
+						"npx cdk synth", // Synth command (always same)
+						"bash start_codecov.sh"))
+				.build();
+	}
+
+	private AddStageOpts flutterOptions(PolicyStatement flutterDeployPermission) {
+		return getFlutterStageOptions(getFlutterBuildAndDeploy(flutterDeployPermission),
+				CodeBuildStep.Builder.create("Start iOS build on Codemagic")
+						.commands(List.of("pwd", "ls -al", "echo does not do anything"))
+						.rolePolicyStatements(Arrays.asList(flutterDeployPermission)).build());
+	}
+
+	private void adddPipelineStateChangeNotifaction(final String id, final CodePipeline pipeline) {
+		try {
+			Pipeline detailedPipeline = pipeline.getPipeline();
+			detailedPipeline.notifyOnAnyStageStateChange(id,
+					Topic.fromTopicArn(this, "snstopicPipelineNotification", snsTopic.getTopic().getTopicArn()));
+		} catch (Exception e) {
+			if (e.getLocalizedMessage().contains("Pipeline not created yet")) {
+				System.err.println("Error attaching notification to pipeline - pipeline not yet created");
+				e.printStackTrace();
+			} else {
+				throw new RuntimeException("Error adding pipeline change notifiaction", e);
+			}
+		}
+	}
+
+	private CodeBuildStep getFlutterBuildAndDeploy(PolicyStatement flutterDeployPermission) {
 		Map<String, Object> android = new TreeMap<String, Object>();
 		android.put("android", "latest");
 		android.put("java", "corretto8");
@@ -69,54 +115,13 @@ public class CdkPipelineStack extends Stack {
 				.partialBuildSpec(BuildSpec.fromObject(buildSpec)).installCommands(getFlutterInstallCommands())
 				.commands(getFlutterBuildShellSteps()).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
 				.build();
-		CodeBuildStep startiOsBuild = CodeBuildStep.Builder.create("Start iOS build on Codemagic")
-				.commands(List.of("pwd", "ls -al")).rolePolicyStatements(Arrays.asList(flutterDeployPermission))
-				.build();
-
-		pipeline.addStage(new FlutterBuildStage(this, "FlutterBuildStage"),
-				getFlutterStageOptions(buildAndDeployManual, startiOsBuild));
-
-		snsTopic = SnsTopic.Builder.create(Topic.Builder.create(this, "pipelineNotificationTopic-flutterbuild")
-				.topicName("DeliveryPipelineTopic-flutterbuild").build()).build();
-		snsTopic.getTopic().addToResourcePolicy(PolicyStatement.Builder.create().sid("AllowCodestarNotifications")
-				.effect(Effect.ALLOW).actions(Arrays.asList("SNS:Publish")).resources(Arrays.asList("*"))
-				.principals(Arrays.asList(new ServicePrincipal("codestar-notifications.amazonaws.com"))).build());
-
-		snsTopic.getTopic().addSubscription(EmailSubscription.Builder.create("lockhead@lockhead.net").build());
-
-		CfnOutput.Builder create = CfnOutput.Builder.create(this, "CognitoIdpUserTableName");
-		create.exportName("FlutterCDKSNSTarget");
-		create.value(snsTopic.getTopic().getTopicArn());
-		create.build();
-
-		try {
-			Pipeline detailedPipeline = pipeline.getPipeline();
-			detailedPipeline.notifyOnAnyStageStateChange(id,
-					Topic.fromTopicArn(this, "snstopicPipelineNotification", snsTopic.getTopic().getTopicArn()));
-		} catch (Exception e) {
-			if (e.getLocalizedMessage().contains("Pipeline not created yet")) {
-				System.err.println("Error attaching notification to pipeline - pipeline not yet created");
-				e.printStackTrace();
-			} else {
-				throw e;
-			}
-		}
-
+		return buildAndDeployManual;
 	}
 
 	private PolicyStatement getDeployPermissions() {
 		return PolicyStatement.Builder.create().effect(Effect.ALLOW).resources(Arrays.asList("*"))
 				.actions(Arrays.asList("ssm:DescribeParameters", "ssm:GetParameters", "ssm:GetParameter",
 						"ssm:GetParameterHistory", "cloudformation:*", "s3:*", "apigateway:*", "acm:*", "iam:PassRole"))
-				.build();
-	}
-
-	private AddStageOpts getFlutterBuildStageOpts() {
-		return AddStageOpts.builder()
-				.pre(List.of(ShellStep.Builder
-						.create("Execute TypescriptTests").commands(List.of("cd ios-build", "npm install", "npm test",
-								"ls -al", "ls -al coverage", "cd ..", "ls -al ios-build", "bash start_codecov.sh"))
-						.build()))
 				.build();
 	}
 
@@ -162,8 +167,8 @@ public class CdkPipelineStack extends Stack {
 				"curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
 				"unzip awscliv2.zip", "sudo ./aws/install --bin-dir /usr/local/bin --update", "echo $PATH",
 				"curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -", "sudo apt-get install -y nodejs",
-				"cd ios-build", "npm install", "ls -al node_modules", "npm test", "ls -al", "ls -al coverage", "cd ..", "ls -al ios-build",
-				"bash start_codecov.sh");
+				"cd ios-build", "npm install", "ls -al node_modules", "npm test", "ls -al", "ls -al coverage", "cd ..",
+				"ls -al ios-build", "bash start_codecov.sh");
 	}
 
 	private String getCodepipelineName(String branch) {
