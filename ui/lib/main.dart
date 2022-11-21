@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
-import 'camera.dart';
-
 //https://5j552oravrqyecwbvrwt5izpy40remkd.lambda-url.eu-central-1.on.aws/ - checkage
 
 Future<String> getMinimalDrivingAge(String country) async {
@@ -127,7 +125,6 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
-      CameraExampleHome();
     });
   }
 
